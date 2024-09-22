@@ -1,4 +1,4 @@
-# SwiftValidate
+# ValidatorKit
 
     ValidatorKit is a flexible and extensible validation library for Swift, designed to simplify form validation in iOS apps.
 
