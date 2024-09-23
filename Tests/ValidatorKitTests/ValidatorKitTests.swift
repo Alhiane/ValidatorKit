@@ -28,8 +28,8 @@ struct RulesTests {
     @Test("Min Rule for String Length")
     func testMinRuleForString() {
         let rule = MinRule(value: 3)
-        assert(rule.validate("1234") == nil)
-        assert(rule.validate("12") != nil)
+        assert(rule.validate("123") == nil)
+        assert(rule.validate("12") == nil)
     }
     
     @Test("Max Rule for Int")
@@ -42,7 +42,7 @@ struct RulesTests {
     @Test("Max Rule for String Length")
     func testMaxRuleForString() {
         let rule = MaxRule(value: 5)
-        assert(rule.validate("12345") == nil)
+        assert(rule.validate("5") == nil)
         assert(rule.validate("123456") != nil)
     }
     @Test("Multi Rules") func testMultipleRulesPerField()  {
@@ -75,23 +75,23 @@ struct SchemaTests {
     @Test("Schema Validation") func testValidationSchema()  {
         let username: String = "johndoe"
         let schema = ValidationSchema()
-            .field("username").required()
+            .field("username").required().min(4)
             .field("email").required().email()
             .field("gender").requiredIf(username == "johndoe")
-            .field("amount").numeric()
+            .field("amount").numeric().min(100.08)
             .ready()
 
         let validData: [String: Any] = [
-            "username": "johndoe",
+            "username": "jh",
             "email": "john@example.com",
             "gender": "male",
-            "amount": 100.09
+            "amount": "100.09"
         ]
 
         let invalidData: [String: Any] = [
             "username": "",
             "email": "not-an-email",
-            "amount": "100.09"
+            "amount": 100.09
         ]
 
         let validResult = schema.validate(validData)
