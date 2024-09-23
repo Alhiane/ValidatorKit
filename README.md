@@ -17,30 +17,59 @@ Add the following to your `Package.swift` file:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Alhiane/ValidatorKit.git", from: "1.0.0")
+    .package(url: "https://github.com/Alhiane/ValidatorKit.git", from: "1.0.0-beta")
 ]
 ```
 
 ## Usage
 
 ```swift
-import SwiftValidate
+import ValidatorKit
 
-// Setup validation rules
-ValidationManager.shared.setupCustomValidation(forKey: "email", rules: [
-    RequiredRule(),
-    EmailRule(),
-    MinLengthRule(minLength: 5)
-])
+// setup your schema
+let schema = ValidationSchema()
+    .field("username").required()
+    .field("email").required().email()
+    .field("gender").requiredIf(username == "johndoe")
+    .schema()
+        
+// start the validation whenever you wan't in your code
+let username = "alhiane"
+let email = "aie@aie.aie"
+let invalidData: [String: Any] = [
+    "username": username,
+    "email": email,
+    "gender": ""
+]
 
-// Validate a value
-let errors = Validator.shared.validate("test@example.com", forKey: "email")
+// validate function
+let validResult = schema.validate(validData)
+        
+// check your data at once
+validResult.isValid
 
-// Use with Combine
-textField.textPublisher
-    .validate(key: "email")
-    .sink { errors in
-        // Handle validation errors
-    }
-    .store(in: &cancellables)
+// Access all your data validation rules errors
+validResult.errors
+
+validResult.errors.count == 2
+validResult.errors["username"]
+validResult.errors["email"]
 ```
+
+## Rules
+    
+custom()
+email()
+min()
+max()
+numeric()
+date()
+range()
+pattern()
+URL()
+inArray()
+requiredIf()
+required()
+greaterThan()
+leassThan()
+MIMETypes()

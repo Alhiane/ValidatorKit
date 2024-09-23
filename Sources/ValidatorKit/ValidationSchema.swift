@@ -107,7 +107,7 @@ public class FieldValidator {
     }
     
     @discardableResult
-    public func InArray(_ Array: [Any]) -> FieldValidator {
+    public func inArray(_ Array: [Any]) -> FieldValidator {
         schema.addRule(name, AnyValidationRule(InArrayRule(allowedValues: Array)))
         return self
     }
