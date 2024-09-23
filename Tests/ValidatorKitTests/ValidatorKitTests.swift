@@ -77,17 +77,20 @@ struct SchemaTests {
             .field("username").required()
             .field("email").required().email()
             .field("gender").requiredIf(username == "johndoe")
+            .field("amount").numeric()
             .ready()
 
         let validData: [String: Any] = [
             "username": "johndoe",
             "email": "john@example.com",
-            "gender": "male"
+            "gender": "male",
+            "amount": 100.09
         ]
 
         let invalidData: [String: Any] = [
             "username": "",
-            "email": "not-an-email"
+            "email": "not-an-email",
+            "amount": "100.09"
         ]
 
         let validResult = schema.validate(validData)
