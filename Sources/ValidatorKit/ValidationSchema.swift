@@ -41,6 +41,18 @@ public class FieldValidator {
     }
     
     @discardableResult
+    public func field(_ name: String) -> FieldValidator {
+        return schema.field(name)
+    }
+    
+    // rules
+    @discardableResult
+    public func custom(message: String? = nil, validation: @escaping (Any?) -> Bool) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(CustomRule(validation: validation, message: message)))
+        return self
+    }
+    
+    @discardableResult
     public func required() -> FieldValidator {
         schema.addRule(name, AnyValidationRule(RequiredRule()))
         return self
@@ -53,11 +65,81 @@ public class FieldValidator {
     }
     
     @discardableResult
-    public func custom(_ validation: @escaping (Any?) -> ValidationError?) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(CustomRule(validation: validation)))
+    public func min(_ value: Double) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(MinRule(value: value)))
         return self
     }
     
+    @discardableResult
+    public func max(_ value: Double) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(MinRule(value: value)))
+        return self
+    }
+    
+    @discardableResult
+    public func numeric() -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(NumericRule()))
+        return self
+    }
+    
+    @discardableResult
+    public func date() -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(DateRule()))
+        return self
+    }
+    
+    @discardableResult
+    public func range(_ range: ClosedRange<Int>) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(RangeRule(range: range)))
+        return self
+    }
+
+    @discardableResult
+    public func pattern(_ pattern: String) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(PatternRule(pattern: pattern)))
+        return self
+    }
+    
+    @discardableResult
+    public func URL() -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(URLRule()))
+        return self
+    }
+    
+    @discardableResult
+    public func InArray(_ Array: [Any]) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(InArrayRule(allowedValues: Array)))
+        return self
+    }
+    
+    @discardableResult
+    public func requiredIf(_ condition: Bool) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(RequireIfRule(conditionValue: condition)))
+        return self
+    }
+    
+    @discardableResult
+    public func greaterThan(_ value: Double) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(GreaterThanRule(minValue: value)))
+        return self
+    }
+    
+    public func leassThan(_ value: Double) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(LessThanRule(maxValue: value)))
+        return self
+    }
+    
+    @discardableResult
+    public func MIMETypes(_ MIMETypes: [String]) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(FileExtensionsRule(allowedExtensions: MIMETypes)))
+        return self
+    }
+    
+    // return schema
+    @discardableResult
+    public func ready() -> ValidationSchema {
+        return schema
+    }
 }
 
 public struct ValidationResult {
@@ -69,9 +151,10 @@ public struct ValidationResult {
 }
 
 public struct CustomRule: ValidationRule {
-    let validation: (Any?) -> ValidationError?
+    let validation: (Any?) -> Bool
+    let message: String?
     
     public func validate(_ value: Any?) -> ValidationError? {
-        return validation(value)
+        return validation(value) ? nil : ValidationError(message: message ?? "Validation failed")
     }
 }
