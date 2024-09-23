@@ -41,15 +41,21 @@ public class FieldValidator {
     }
     
     @discardableResult
-    public func required() -> ValidationSchema {
+    public func required() -> FieldValidator {
         schema.addRule(name, AnyValidationRule(RequiredRule()))
-        return schema
+        return self
     }
     
     @discardableResult
-    public func email() -> ValidationSchema {
+    public func email() -> FieldValidator {
         schema.addRule(name, AnyValidationRule(EmailRule()))
-        return schema
+        return self
+    }
+    
+    @discardableResult
+    public func custom(_ validation: @escaping (Any?) -> ValidationError?) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(CustomRule(validation: validation)))
+        return self
     }
     
 }
@@ -59,5 +65,13 @@ public struct ValidationResult {
     
     public var isValid: Bool {
         return errors.isEmpty
+    }
+}
+
+public struct CustomRule: ValidationRule {
+    let validation: (Any?) -> ValidationError?
+    
+    public func validate(_ value: Any?) -> ValidationError? {
+        return validation(value)
     }
 }
