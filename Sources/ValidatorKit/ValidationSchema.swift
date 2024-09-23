@@ -1,15 +1,9 @@
-//
-//  ValidationSchema.swift
-//  ValidatorKit
-//
-//  Created by Alhiane on 23/9/2024.
-//
-
 public class ValidationSchema {
     private var rules: [String: [AnyValidationRule]] = [:]
     
     public init() {}
     
+    @discardableResult
     public func field(_ name: String) -> FieldValidator {
         return FieldValidator(name: name, schema: self)
     }
@@ -47,18 +41,17 @@ public class FieldValidator {
     }
     
     @discardableResult
-    public func required() -> FieldValidator {
+    public func required() -> ValidationSchema {
         schema.addRule(name, AnyValidationRule(RequiredRule()))
-        return self
+        return schema
     }
     
-//    @discardableResult
-//    public func email() -> FieldValidator {
-//        schema.addRule(name, AnyValidationRule(EmailRule()))
-//        return self
-//    }
+    @discardableResult
+    public func email() -> ValidationSchema {
+        schema.addRule(name, AnyValidationRule(EmailRule()))
+        return schema
+    }
     
-    // Add more validation methods as needed
 }
 
 public struct ValidationResult {
