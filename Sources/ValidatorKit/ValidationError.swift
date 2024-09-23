@@ -6,7 +6,7 @@
 //
 import Foundation
 
-public struct ValidationError: Error {
+public struct ValidationError: Error, Equatable {
     public let message: String
     
     public init(message: String) {
