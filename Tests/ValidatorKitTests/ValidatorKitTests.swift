@@ -19,9 +19,10 @@ struct RulesTests {
     }
     @Test("Min Rule for Int")
     func testMinRuleForInt() {
-        let rule = MinRule(value: 18)
+        let rule = MinRule(value: 18.01)
         assert(rule.validate(20) == nil)
         assert(rule.validate(15) != nil)
+        assert(rule.validate(18.00) != nil)
     }
     
     @Test("Min Rule for String Length")

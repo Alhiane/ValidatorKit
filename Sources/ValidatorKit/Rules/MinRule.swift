@@ -9,7 +9,7 @@ public struct MinRule: ValidationRule {
     private let minValue: Double
     
     public init(value: Double) {
-        self.minValue = value
+        self.minValue = Double(value)
     }
     
     public func validate(_ value: Any?) -> ValidationError? {

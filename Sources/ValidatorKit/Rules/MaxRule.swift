@@ -8,7 +8,7 @@ public struct MaxRule: ValidationRule {
     private let maxValue: Double
     
     public init(value: Double) {
-        self.maxValue = value
+        self.maxValue = Double(value)
     }
     
     public func validate(_ value: Any?) -> ValidationError? {
