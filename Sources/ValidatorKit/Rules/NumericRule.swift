@@ -8,12 +8,15 @@
 import Foundation
 
 public struct NumericRule: ValidationRule {
-    public init() {}
+    public let message: String
+    public init(message: String? = nil) {
+        self.message = message ?? ValidationMessage.message(for: ValidationMessage.numericKey, defaultMessage: ValidationMessage.numeric)
+    }
     
     public func validate(_ value: Any?) -> ValidationError? {
         // Check if value is nil
         guard let value = value else {
-            return ValidationError(message: "This field must be a number")
+            return ValidationError(message: message)
         }
         
         // Handle numeric types directly
@@ -30,6 +33,6 @@ public struct NumericRule: ValidationRule {
         }
         
         // If none of the above checks passed, return an error
-        return ValidationError(message: "This field must be a valid number")
+        return ValidationError(message: message)
     }
 }

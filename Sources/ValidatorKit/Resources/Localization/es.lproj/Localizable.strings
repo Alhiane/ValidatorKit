@@ -1,0 +1,23 @@
+//
+//  Localizable.strings
+//  ValidatorKit
+//
+//  Created by Alhiane on 26/9/2024.
+//
+
+/* Localizable.strings (Spanish) */
+"validation.custom" = "La validación falló.";
+"validation.email" = "Por favor, introduce una dirección de correo electrónico válida.";
+"validation.min" = "El valor debe ser al menos %@.";
+"validation.max" = "El valor no debe exceder %@.";
+"validation.numeric" = "Por favor, introduce un valor numérico.";
+"validation.date" = "Por favor, introduce una fecha válida.";
+"validation.range" = "El valor debe estar entre %@ y %@.";
+"validation.pattern" = "El valor no coincide con el patrón requerido.";
+"validation.url" = "Por favor, introduce una URL válida.";
+"validation.inArray" = "El valor debe ser una de las opciones permitidas.";
+"validation.requiredIf" = "Este campo es obligatorio según la condición especificada.";
+"validation.required" = "Este campo es obligatorio.";
+"validation.greaterThan" = "El valor debe ser mayor que %@.";
+"validation.lessThan" = "El valor debe ser menor que %@.";
+"validation.mimeTypes" = "El tipo de archivo debe ser uno de los tipos permitidos: %@.";

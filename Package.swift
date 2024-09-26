@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "ValidatorKit",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v13),
         .macOS(.v10_15),
@@ -17,7 +18,11 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ValidatorKit"),
+            name: "ValidatorKit",
+            resources: [
+                .process("Resources/Localization")
+            ]
+        ),
         .testTarget(
             name: "ValidatorKitTests",
             dependencies: ["ValidatorKit"]

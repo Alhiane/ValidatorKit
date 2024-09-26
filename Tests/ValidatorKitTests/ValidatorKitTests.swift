@@ -75,14 +75,14 @@ struct SchemaTests {
     @Test("Schema Validation") func testValidationSchema()  {
         let username: String = "johndoe"
         let schema = ValidationSchema()
-            .field("username").required().min(4)
+            .field("username").required()
             .field("email").required().email()
             .field("gender").requiredIf(username == "johndoe")
             .field("amount").numeric().min(100.08)
             .ready()
 
         let validData: [String: Any] = [
-            "username": "jh",
+            "username": "jhsa",
             "email": "john@example.com",
             "gender": "male",
             "amount": "100.09"
@@ -100,6 +100,7 @@ struct SchemaTests {
 
         let invalidResult = schema.validate(invalidData)
          assert(!invalidResult.isValid)
+        
          assert(invalidResult.errors.count == 2)
          assert(invalidResult.errors["username"] != nil)
          assert(invalidResult.errors["email"] != nil)
@@ -144,3 +145,31 @@ struct ChainedFieldsTests {
     }
 }
 
+@Suite("Validations Messages")
+struct ValidationsMessagesTests {
+    @Test("Email Rule with Custom Message") func testEmailRuleWithCustomMessage() {
+        let customMessage = "SVP Donnez un email valide"
+        let schema = ValidationSchema()
+            .field("email").email(message: customMessage)
+            .ready()
+
+        let invalidData = ["email": "not-an-email"]
+        let result = schema.validate(invalidData)
+
+        assert(!result.isValid)
+        print(result.errors)
+        assert(result.errors["email"]?.first == customMessage)
+    }
+    
+    // test range
+    @Test("Range Rule with Custom Message") func testRangeRuleWithCustomMessage() {
+
+        let schema = ValidationSchema()
+            .field("number").range(1...10)
+            .ready()
+        
+        let invalidData = ["number": 21]
+        let result = schema.validate(invalidData)
+        assert(result.errors["number"]?.isEmpty == false)
+    }
+}

@@ -1,0 +1,24 @@
+//
+//  Localizable.strings
+//  ValidatorKit
+//
+//  Created by Alhiane on 26/9/2024.
+//
+
+/* Localizable.strings (Arabic) */
+"validation.custom" = "فشلت عملية التحقق.";
+"validation.email" = "يرجى إدخال عنوان بريد إلكتروني صالح.";
+"validation.min" = "يجب أن تكون القيمة على الأقل %@.";
+"validation.max" = "يجب ألا تتجاوز القيمة %@.";
+"validation.numeric" = "يرجى إدخال قيمة رقمية.";
+"validation.date" = "يرجى إدخال تاريخ صالح.";
+"validation.range" = "يجب أن تكون القيمة بين %@ و %@.";
+"validation.pattern" = "القيمة لا تتطابق مع النموذج المطلوب.";
+"validation.url" = "يرجى إدخال عنوان URL صالح.";
+"validation.inArray" = "يجب أن تكون القيمة واحدة من الخيارات المسموح بها.";
+"validation.requiredIf" = "هذا الحقل مطلوب بناءً على الشرط المحدد.";
+"validation.required" = "هذا الحقل مطلوب.";
+"validation.greaterThan" = "يجب أن تكون القيمة أكبر من %@.";
+"validation.lessThan" = "يجب أن تكون القيمة أقل من %@.";
+"validation.mimeTypes" = "يجب أن يكون نوع الملف واحدًا من الأنواع المسموح بها: %@.";
+

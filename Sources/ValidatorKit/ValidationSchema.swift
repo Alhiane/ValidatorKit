@@ -47,20 +47,20 @@ public class FieldValidator {
     
     // rules
     @discardableResult
-    public func custom(message: String? = nil, validation: @escaping (Any?) -> Bool) -> FieldValidator {
+    public func custom(message: String, validation: @escaping (Any?) -> Bool) -> FieldValidator {
         schema.addRule(name, AnyValidationRule(CustomRule(validation: validation, message: message)))
         return self
     }
     
     @discardableResult
-    public func required() -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(RequiredRule()))
+    public func required(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(RequiredRule(message: message)))
         return self
     }
     
     @discardableResult
-    public func email() -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(EmailRule()))
+    public func email(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(EmailRule(message: message)))
         return self
     }
     
@@ -89,8 +89,8 @@ public class FieldValidator {
     }
     
     @discardableResult
-    public func range(_ range: ClosedRange<Int>) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(RangeRule(range: range)))
+    public func range(_ range: ClosedRange<Int>, message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(RangeRule(range: range, message: message)))
         return self
     }
 
@@ -152,9 +152,14 @@ public struct ValidationResult {
 
 public struct CustomRule: ValidationRule {
     let validation: (Any?) -> Bool
-    let message: String?
+    public let message: String
+    
+    public init(validation: @escaping (Any?) -> Bool, message: String = "Validation failed") {
+        self.validation = validation
+        self.message = message
+    }
     
     public func validate(_ value: Any?) -> ValidationError? {
-        return validation(value) ? nil : ValidationError(message: message ?? "Validation failed")
+        return validation(value) ? nil : ValidationError(message: message)
     }
 }

@@ -9,4 +9,5 @@ import Foundation
 
 public protocol ValidationRule {
     func validate(_ value: Any?) -> ValidationError?
+    var message: String { get }
 }

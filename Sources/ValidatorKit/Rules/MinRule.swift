@@ -9,13 +9,16 @@ public struct MinRule: ValidationRule {
     private let minValue: Double
     private let epsilon = 0.0001 // Precision handling for floating-point numbers
 
-    public init(value: Double) {
+    public let message: String
+    
+    public init(value: Double,message: String? = nil) {
         self.minValue = value
+        self.message = message ?? ValidationMessage.message(for: ValidationMessage.minKey, defaultMessage: ValidationMessage.min,dynamicValues: [String(value)])
     }
 
     public func validate(_ value: Any?) -> ValidationError? {
         guard let value = value else {
-            return ValidationError(message: "Value cannot be nil")
+            return ValidationError(message: ValidationMessage.message(for: ValidationMessage.notNullKey, defaultMessage: ValidationMessage.notNull))
         }
         
         // Check if the value is a numeric string
@@ -31,25 +34,13 @@ public struct MinRule: ValidationRule {
             return validateNumeric(Double(intValue))
         }
         
-        // Handle non-numeric strings (apply string length validation)
-        if let stringValue = value as? String {
-            return validateStringLength(stringValue)
-        }
-        
         // If the value doesn't match any expected type
-        return ValidationError(message: "Invalid value type")
+        return ValidationError(message: ValidationMessage.message(for: ValidationMessage.invalidTypeKey, defaultMessage: ValidationMessage.invalidType))
     }
     
     private func validateNumeric(_ number: Double) -> ValidationError? {
         if number < minValue - epsilon {
-            return ValidationError(message: "Value must be greater than or equal to \(minValue)")
-        }
-        return nil
-    }
-    
-    private func validateStringLength(_ string: String) -> ValidationError? {
-        if string.count < Int(minValue) {
-            return ValidationError(message: "Minimum length is \(Int(minValue)) characters")
+            return ValidationError(message: message)
         }
         return nil
     }
