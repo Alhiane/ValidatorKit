@@ -47,7 +47,7 @@ public class FieldValidator {
     
     // rules
     @discardableResult
-    public func custom(message: String, validation: @escaping (Any?) -> Bool) -> FieldValidator {
+    public func custom(message: String,validation: @escaping (Any?) -> Bool ) -> FieldValidator {
         schema.addRule(name, AnyValidationRule(CustomRule(validation: validation, message: message)))
         return self
     }
@@ -65,26 +65,26 @@ public class FieldValidator {
     }
     
     @discardableResult
-    public func min(_ value: Double) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(MinRule(value: value)))
+    public func min(_ value: Double, message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(MinRule(value: value, message: message)))
         return self
     }
     
     @discardableResult
-    public func max(_ value: Double) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(MinRule(value: value)))
+    public func max(_ value: Double,message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(MinRule(value: value,message: message)))
         return self
     }
     
     @discardableResult
-    public func numeric() -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(NumericRule()))
+    public func numeric(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(NumericRule(message: message)))
         return self
     }
     
     @discardableResult
-    public func date() -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(DateRule()))
+    public func date(range: DateRange? = nil, format: String = "yyyy-MM-dd",message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(DateRule(range: range,format: format,message: message)))
         return self
     }
     
@@ -95,43 +95,43 @@ public class FieldValidator {
     }
 
     @discardableResult
-    public func pattern(_ pattern: String) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(PatternRule(pattern: pattern)))
+    public func pattern(_ pattern: String,message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(PatternRule(pattern: pattern,message: message)))
         return self
     }
     
     @discardableResult
-    public func URL() -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(URLRule()))
+    public func URL(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(URLRule(message: message)))
         return self
     }
     
     @discardableResult
-    public func inArray(_ Array: [Any]) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(InArrayRule(allowedValues: Array)))
+    public func inArray(_ Array: [Any], message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(InArrayRule(allowedValues: Array, message: message)))
         return self
     }
     
     @discardableResult
-    public func requiredIf(_ condition: Bool) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(RequireIfRule(conditionValue: condition)))
+    public func requiredIf(_ condition: Bool, message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(RequireIfRule(conditionValue: condition, message: message)))
         return self
     }
     
     @discardableResult
-    public func greaterThan(_ value: Double) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(GreaterThanRule(minValue: value)))
+    public func greaterThan(_ value: Double, message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(GreaterThanRule(minValue: value, message: message)))
         return self
     }
     
-    public func leassThan(_ value: Double) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(LessThanRule(maxValue: value)))
+    public func leassThan(_ value: Double,message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(LessThanRule(maxValue: value, message: message)))
         return self
     }
     
     @discardableResult
-    public func MIMETypes(_ MIMETypes: [String]) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(FileExtensionsRule(allowedExtensions: MIMETypes)))
+    public func MIMETypes(_ MIMETypes: [String],message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(FileExtensionsRule(allowedExtensions: MIMETypes,message: message)))
         return self
     }
     
@@ -154,9 +154,9 @@ public struct CustomRule: ValidationRule {
     let validation: (Any?) -> Bool
     public let message: String
     
-    public init(validation: @escaping (Any?) -> Bool, message: String = "Validation failed") {
+    public init(validation: @escaping (Any?) -> Bool, message: String? = nil) {
         self.validation = validation
-        self.message = message
+        self.message = message ?? ValidationMessage.message(for: ValidationMessage.customKey, defaultMessage: ValidationMessage.custom)
     }
     
     public func validate(_ value: Any?) -> ValidationError? {

@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import ValidatorKit
 
 // suits
@@ -148,7 +149,7 @@ struct ChainedFieldsTests {
 @Suite("Validations Messages")
 struct ValidationsMessagesTests {
     @Test("Email Rule with Custom Message") func testEmailRuleWithCustomMessage() {
-        let customMessage = "SVP Donnez un email valide"
+        let customMessage = "Please enter a valid email address."
         let schema = ValidationSchema()
             .field("email").email(message: customMessage)
             .ready()
@@ -172,4 +173,68 @@ struct ValidationsMessagesTests {
         let result = schema.validate(invalidData)
         assert(result.errors["number"]?.isEmpty == false)
     }
+}
+
+@Suite("Date Rule Tests")
+struct DateRuleTests {
+    let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+
+    @Test("Valid Date")
+    func testValidDate() {
+        let rule = DateRule()
+        let date = Date()
+        assert(rule.validate(date) == nil)
+    }
+
+    @Test("Invalid Date Type")
+    func testInvalidDateType() {
+        let rule = DateRule()
+        assert(rule.validate("Not a date") != nil)
+        assert(rule.validate(123) != nil)
+    }
+
+    @Test("Valid String Date")
+    func testValidStringDate() {
+        let rule = DateRule(format: "yyyy-MM-dd")
+        assert(rule.validate("2023-09-28") == nil)
+    }
+
+    @Test("Invalid String Date Format")
+    func testInvalidStringDateFormat() {
+        let rule = DateRule(format: "yyyy-MM-dd")
+        assert(rule.validate("28/09/2023") != nil)
+    }
+
+    @Test("Date Within Range")
+    func testDateWithinRange() {
+        let fromDate = dateFormatter.date(from: "2023-01-01")!
+        let toDate = dateFormatter.date(from: "2023-12-31")!
+        let rule = DateRule(range: DateRange(from: fromDate, to: toDate))
+        
+        assert(rule.validate("2023-06-15") == nil)
+        assert(rule.validate(dateFormatter.date(from: "2023-06-15")!) == nil)
+    }
+
+    @Test("Date Before Range")
+    func testDateBeforeRange() {
+        let fromDate = dateFormatter.date(from: "2023-01-01")!
+        let rule = DateRule(range: DateRange(from: fromDate))
+        
+        assert(rule.validate("2022-12-31") != nil)
+        assert(rule.validate(dateFormatter.date(from: "2022-12-31")!) != nil)
+    }
+
+    @Test("Date After Range")
+    func testDateAfterRange() {
+        let toDate = dateFormatter.date(from: "2023-12-31")!
+        let rule = DateRule(range: DateRange(to: toDate))
+        
+        assert(rule.validate("2024-01-01") != nil)
+        assert(rule.validate(dateFormatter.date(from: "2024-01-01")!) != nil)
+    }
+
 }

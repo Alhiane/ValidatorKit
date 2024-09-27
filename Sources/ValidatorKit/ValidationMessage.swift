@@ -17,6 +17,7 @@ struct ValidationMessage {
     static let maxLength = "Value must be no more than %@ characters long."
     static let numeric = "Please enter a numeric value."
     static let date = "Please enter a valid date."
+    static let dateFormat = "Please enter a valid date in the format %@."
     static let range = "Value must be between %@ and %@." // Placeholders for min and max
     static let pattern = "Value does not match the required pattern."
     static let url = "Please enter a valid URL."
@@ -30,6 +31,8 @@ struct ValidationMessage {
     static let invalidType = "Invalid value type"
     static let invalidFile = "Invalid file"
     static let invalidValue = "Invalid value"
+    static let dateRangeTooEarly = "Date must not be earlier than %@."
+    static let dateRangeTooLate = "Date must not be later than %@."
 
     // Localization keys
     static let customKey = "validation.custom"
@@ -53,6 +56,9 @@ struct ValidationMessage {
     static let invalidTypeKey = "validation.invalidType"
     static let invalidFileKey = "validation.invalidFile"
     static let invalidValueKey = "validation.invalidValue"
+    static let dateFormatKey = "validation.date.format"
+    static let dateRangeTooEarlyKey = "validation.date.tooEarly"
+    static let dateRangeTooLateKey = "validation.date.tooLate"
     
     // Method to retrieve localized message or fallback to default
     public static func message(for key: String, defaultMessage: String, dynamicValues: [CVarArg] = []) -> String {
