@@ -1,19 +1,26 @@
 # ValidatorKit
 
-    ValidatorKit is a flexible and extensible validation library for Swift, designed to simplify form validation in iOS apps.
+A lightweight, fluent validation library for Swift — chainable rules, localized error messages, zero dependencies.
 
-## Features
+[![CI](https://github.com/Alhiane/ValidatorKit/actions/workflows/ci.yml/badge.svg)](https://github.com/Alhiane/ValidatorKit/actions/workflows/ci.yml)
+[![Swift 6.0](https://img.shields.io/badge/swift-6.0-orange.svg)](https://swift.org)
+[![SPM compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
+[![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-lightgrey.svg)](Package.swift)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-- Easy to use validation system
-- Ability to create custom validation rules
-- Support for multiple validation rules per field
-- SwiftUI/Combine live-binding validation is planned (tracked in #11)
+📖 **[Full documentation & rules reference](https://alhiane.com/open-source/validatorkit)**
+
+## Why ValidatorKit
+
+- **Fluent, chainable schemas** — describe every field's rules in one readable expression
+- **Zero dependencies** — pure Swift, Foundation only
+- **Localized out of the box** — error messages ship in English, Arabic, Spanish, and French
+- **20+ built-in rules** — email, phone, credit card (Luhn), IBAN, password strength, dates, regex, file size, and more
+- **Works anywhere** — validate a decoded JSON payload, a form dictionary, or a view model's fields the same way
 
 ## Installation
 
 ### Swift Package Manager
-
-Add the following to your `Package.swift` file:
 
 ```swift
 dependencies: [
@@ -21,140 +28,42 @@ dependencies: [
 ]
 ```
 
-## Usage
+## Quick start
 
 ```swift
 import ValidatorKit
 
-// Setup your schema
 let schema = ValidationSchema()
-    .field("username").required() // Field must be present and not empty
-    .field("email").required().email() // Field must be a valid email format
-    .field("gender").requiredIf(username == "johndoe") // Required if username is "johndoe"
-    .field("age").required().greaterThan(18) // Must be greater than 18
-    .field("amount").numeric().min(100.08) // Must be a number and at least 100.08
-    .field("password").required().passwordStrength(minLength: 8, requireUppercase: true, requireDigit: true, requireSymbol: true) // Must meet the configured strength requirements
-    .field("url").required().URL() // Must be a valid URL
-    .field("dateOfBirth").required().date() // Must be a valid date
-    .field("file").required().MIMETypes(["image/jpeg", "image/png"]) // Must be a valid file type
-    .field("fileSize").required().maxFileSize(5_000_000) // Companion field holding the file's size in bytes; must not exceed 5 MB
-    .field("hobbies").inArray(["coding", "reading", "traveling"]) // Must be one of the allowed values
-    .field("score").numeric().min(0).max(100) // Must be a number between 0 and 100
-    .field("customField").pattern("^[A-Z]{3}-\\d{3}$") // Must match the pattern "XXX-123"
-    .field("phone").required().phoneNumber() // Must be a valid international phone number
-    .field("card").required().creditCard() // Must pass the Luhn checksum
-    .field("iban").required().IBAN() // Must be a valid IBAN
+    .field("email").required().email()
+    .field("password").required().passwordStrength(minLength: 8, requireDigit: true, requireSymbol: true)
+    .field("age").required().greaterThan(18)
     .ready()
 
-// Example data for validation
-let validData: [String: Any] = [
-    "username": "alhiane",
-    "email": "aie@aie.aie",
-    "gender": "male",
-    "age": 25,
-    "amount": "150.00",
-    "password": "SecurePassword123!",
-    "url": "https://example.com",
-    "dateOfBirth": Date(),
-    "file": "image/jpeg",
-    "fileSize": 2_500_000,
-    "hobbies": "coding",
-    "score": 85,
-    "customField": "ABC-123",
-    "phone": "+14155552671",
-    "card": "4111111111111111",
-    "iban": "GB82WEST12345698765432"
-]
-
-let invalidData: [String: Any] = [
-    "username": "",
+let result = schema.validate([
     "email": "not-an-email",
-    "gender": "",
-    "age": 16,
-    "amount": "50.00",
     "password": "short",
-    "url": "invalid-url",
-    "dateOfBirth": "not-a-date",
-    "file": "text/plain",
-    "fileSize": 8_000_000,
-    "hobbies": "sports",
-    "score": 150,
-    "customField": "invalid",
-    "phone": "12345",
-    "card": "4111111111111112",
-    "iban": "not-an-iban"
-]
+    "age": 16
+])
 
-// Validate function
-let validResult = schema.validate(validData)
-let invalidResult = schema.validate(invalidData)
-
-// Check validation results
-print(validResult.isValid) // true
-print(invalidResult.isValid) // false
-
-// Access validation errors
-print(invalidResult.errors) // Display all errors
+result.isValid            // false
+result.errors["email"]    // ["Please enter a valid email address."]
 ```
 
-`required()` also catches a field whose key is missing entirely from the
-input, not just an empty value:
+Custom validation when a built-in rule isn't enough:
 
 ```swift
-let nameSchema = ValidationSchema()
-    .field("name").required()
-    .ready()
-
-let result = nameSchema.validate([:]) // "name" key is absent, not just empty
-print(result.isValid) // false
-print(result.errors["name"]!) // ["This field is required."]
+.field("username").required().custom(message: "Must be lowercase, no spaces") { value in
+    guard let username = value as? String else { return false }
+    return username == username.lowercased() && !username.contains(" ")
+}
 ```
 
-## Rules
+For the complete list of rules, localization details, and more examples, see the **[full docs](https://alhiane.com/open-source/validatorkit)**.
 
-| Rule Name      | Description                                           |
-|----------------|-------------------------------------------------------|
-| `custom()`     | Allows for custom validation logic with a message.   |
-| `email()`      | Validates that the field contains a valid email format. |
-| `min(value)`   | Ensures the value is greater than or equal to the specified minimum. |
-| `max(value)`   | Ensures the value is less than or equal to the specified maximum. |
-| `numeric()`    | Validates that the field contains a numeric value.   |
-| `date()`       | Validates that the field contains a valid date.      |
-| `range(range)` | Validates that the value falls within a specified range. |
-| `pattern(pattern)` | Validates that the value matches a specified regex pattern. |
-| `URL()`        | Validates that the field contains a valid URL.       |
-| `inArray(array)` | Validates that the value is one of the allowed values in the array. |
-| `requiredIf(condition)` | Makes the field required based on a specified condition. |
-| `required()`   | Ensures the field is present and not empty.          |
-| `greaterThan(value)` | Validates that the value is greater than the specified value. |
-| `lessThan(value)` | Validates that the value is less than the specified value. |
-| `MIMETypes(types)` | Validates that the file type matches one of the allowed MIME types. |
-| `phoneNumber()` | Validates a basic, E.164-ish international phone number format. |
-| `creditCard()` | Validates a credit card number using the Luhn checksum algorithm. |
-| `IBAN()`        | Validates an IBAN (International Bank Account Number) format and checksum. |
-| `maxFileSize(bytes)` | Ensures a numeric field (file size in bytes) does not exceed the specified maximum. |
-| `passwordStrength(...)` | Validates that the value meets a minimum length and any enabled character-class requirements (uppercase, lowercase, digit, symbol). |
+## Contributing
 
+Issues and PRs are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the development and release workflow.
 
+## License
 
-## Length Validation and Grapheme Clusters
-
-ValidatorKit's length-based rules (`min`, `max`) use Swift's `String.count`, which counts **extended grapheme clusters**. This means:
-
-- Emoji are counted correctly as single characters (e.g., "😀" = 1, "🇺🇸" = 1)
-- Combining diacritics are handled properly (e.g., "e\u{0301}" = 1, not 2)
-- ZWJ sequences count as single characters (e.g., "👨‍👩‍👧‍👦" = 1)
-
-This is the correct behavior for user-facing validation, especially for internationalized applications using Arabic, Hebrew, or other languages with combining marks.
-
-## Releasing
-
-Releases follow [Semantic Versioning](https://semver.org/). Every pull request should carry exactly one of the `major`, `minor`, or `patch` labels, describing the size of its change:
-
-| Label | When to use it |
-|-------|-----------------|
-| `major` | Breaking API change (`x.0.0`) |
-| `minor` | New backwards-compatible feature (`0.x.0`) |
-| `patch` | Backwards-compatible bug fix or tweak (`0.0.x`) |
-
-On every merge to `master`, [Release Drafter](https://github.com/release-drafter/release-drafter) updates a **draft** GitHub Release: it resolves the next version from the merged PRs' labels (highest bump wins) and compiles a changelog from their titles. Nothing is published automatically — review the draft under [Releases](../../releases) and publish it (which also creates the `vX.Y.Z` git tag SPM consumers pin to) whenever you're ready to ship.
+MIT — see [LICENSE](LICENSE).
