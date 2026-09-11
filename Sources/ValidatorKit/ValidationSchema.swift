@@ -12,11 +12,10 @@ public class ValidationSchema {
         var errors: [String: [String]] = [:]
 
         for (field, fieldRules) in rules {
-            if let value = object[field] {
-                let fieldErrors = fieldRules.compactMap { $0.validate(value) }
-                if !fieldErrors.isEmpty {
-                    errors[field] = fieldErrors.map { $0.message }
-                }
+            let value = object[field]
+            let fieldErrors = fieldRules.compactMap { $0.validate(value) }
+            if !fieldErrors.isEmpty {
+                errors[field] = fieldErrors.map { $0.message }
             }
         }
 
@@ -72,7 +71,7 @@ public class FieldValidator {
 
     @discardableResult
     public func max(_ value: Double, message: String? = nil) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(MinRule(value: value, message: message)))
+        schema.addRule(name, AnyValidationRule(MaxRule(value: value, message: message)))
         return self
     }
 
