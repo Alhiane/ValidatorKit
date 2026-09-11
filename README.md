@@ -116,7 +116,7 @@ print(invalidResult.errors) // Display all errors
 
 ValidatorKit's length-based rules (`min`, `max`) use Swift's `String.count`, which counts **extended grapheme clusters**. This means:
 
-- Emoji are counted correctly as single characters (e.g., "😀" = 1, "🇺🇸" = 2)
+- Emoji are counted correctly as single characters (e.g., "😀" = 1, "🇺🇸" = 1)
 - Combining diacritics are handled properly (e.g., "e\u{0301}" = 1, not 2)
 - ZWJ sequences count as single characters (e.g., "👨‍👩‍👧‍👦" = 1)
 

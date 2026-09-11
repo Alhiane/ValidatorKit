@@ -31,6 +31,8 @@ struct RulesTests {
         let rule = MinRule(value: 3)
         assert(rule.validate("123") == nil)
         assert(rule.validate("12") == nil)
+        assert(rule.validate("abc") == nil)
+        assert(rule.validate("ab") != nil)
     }
 
     @Test("Max Rule for Int")
@@ -45,15 +47,18 @@ struct RulesTests {
         let rule = MaxRule(value: 5)
         assert(rule.validate("5") == nil)
         assert(rule.validate("123456") != nil)
+        assert(rule.validate("abcde") == nil)
+        assert(rule.validate("abcdef") != nil)
     }
 
     @Test("Min Rule for String Length with Emoji")
     func testMinRuleForStringWithEmoji() {
-        let rule = MinRule(value: 2)
-        // Flag emoji (regional indicator symbols) - counts as 2 grapheme clusters
+        let rule = MinRule(value: 1)
+        // Flag emoji (regional indicator symbols) - counts as 1 grapheme cluster
         assert(rule.validate("🇺🇸") == nil)
         // Single emoji - counts as 1 grapheme cluster
-        assert(rule.validate("😀") != nil)
+        assert(rule.validate("😀") == nil)
+        assert(rule.validate("") != nil)
     }
 
     @Test("Max Rule for String Length with Emoji")
