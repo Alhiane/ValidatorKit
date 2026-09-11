@@ -24,4 +24,6 @@
 "validation.phoneNumber" = "يرجى إدخال رقم هاتف صالح.";
 "validation.creditCard" = "يرجى إدخال رقم بطاقة ائتمان صالح.";
 "validation.iban" = "يرجى إدخال رقم آيبان (IBAN) صالح.";
+"validation.fileSize" = "يجب ألا يتجاوز حجم الملف %@ بايت.";
+"validation.passwordStrength" = "كلمة المرور لا تستوفي متطلبات القوة المطلوبة.";
 

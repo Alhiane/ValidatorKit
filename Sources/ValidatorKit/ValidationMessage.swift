@@ -27,6 +27,7 @@ struct ValidationMessage {
     static let greaterThan = "Value must be greater than %@."
     static let lessThan = "Value must be less than %@."
     static let mimeTypes = "File type must be one of the allowed types: %@."
+    static let fileSize = "File size must not exceed %@ bytes."
     static let notNull = "Value must not be null."
     static let invalidType = "Invalid value type"
     static let invalidFile = "Invalid file"
@@ -36,6 +37,7 @@ struct ValidationMessage {
     static let phoneNumber = "Please enter a valid phone number."
     static let creditCard = "Please enter a valid credit card number."
     static let iban = "Please enter a valid IBAN."
+    static let passwordStrength = "Password does not meet the required strength."
 
     // Localization keys
     static let customKey = "validation.custom"
@@ -55,6 +57,7 @@ struct ValidationMessage {
     static let greaterThanKey = "validation.greaterThan"
     static let lessThanKey = "validation.lessThan"
     static let mimeTypesKey = "validation.mimeTypes"
+    static let fileSizeKey = "validation.fileSize"
     static let notNullKey = "validation.notnull"
     static let invalidTypeKey = "validation.invalidType"
     static let invalidFileKey = "validation.invalidFile"
@@ -65,6 +68,7 @@ struct ValidationMessage {
     static let phoneNumberKey = "validation.phoneNumber"
     static let creditCardKey = "validation.creditCard"
     static let ibanKey = "validation.iban"
+    static let passwordStrengthKey = "validation.passwordStrength"
 
     // Method to retrieve localized message or fallback to default
     public static func message(for key: String, defaultMessage: String, dynamicValues: [CVarArg] = []) -> String {

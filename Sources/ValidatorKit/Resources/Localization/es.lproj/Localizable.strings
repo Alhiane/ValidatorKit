@@ -24,3 +24,5 @@
 "validation.phoneNumber" = "Por favor, introduce un número de teléfono válido.";
 "validation.creditCard" = "Por favor, introduce un número de tarjeta de crédito válido.";
 "validation.iban" = "Por favor, introduce un IBAN válido.";
+"validation.fileSize" = "El tamaño del archivo no debe exceder %@ bytes.";
+"validation.passwordStrength" = "La contraseña no cumple con el nivel de seguridad requerido.";

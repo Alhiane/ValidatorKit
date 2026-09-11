@@ -1,19 +1,18 @@
 //
-//  MinRule.swift
+//  FileSizeRule.swift
 //  ValidatorKit
 //
 //  Created by Alhiane on 23/9/2024.
 //
 
-public struct MinRule: ValidationRule {
-    private let minValue: Double
+public struct FileSizeRule: ValidationRule {
+    private let maxBytes: Double
     private let epsilon = 0.0001 // Precision handling for floating-point numbers
-
     public let message: String
 
-    public init(value: Double, message: String? = nil) {
-        self.minValue = value
-        self.message = message ?? ValidationMessage.message(for: ValidationMessage.minKey, defaultMessage: ValidationMessage.min, dynamicValues: [String(value)])
+    public init(maxBytes: Int, message: String? = nil) {
+        self.maxBytes = Double(maxBytes)
+        self.message = message ?? ValidationMessage.message(for: ValidationMessage.fileSizeKey, defaultMessage: ValidationMessage.fileSize, dynamicValues: [String(maxBytes)])
     }
 
     public func validate(_ value: Any?) -> ValidationError? {
@@ -21,12 +20,10 @@ public struct MinRule: ValidationRule {
             return ValidationError(message: ValidationMessage.message(for: ValidationMessage.notNullKey, defaultMessage: ValidationMessage.notNull))
         }
 
-        if let stringValue = value as? String {
-            if let numericValue = Double(stringValue) {
-                // Preserve numeric-string behavior.
-                return validateNumeric(numericValue)
-            }
-            return validateStringLength(stringValue)
+        // Check if the value is a numeric string
+        if let stringValue = value as? String, let numericValue = Double(stringValue) {
+            // Treat numeric string as a number and apply numeric validation
+            return validateNumeric(numericValue)
         }
 
         // Handle actual numeric types (Int or Double)
@@ -41,14 +38,7 @@ public struct MinRule: ValidationRule {
     }
 
     private func validateNumeric(_ number: Double) -> ValidationError? {
-        if number < minValue - epsilon {
-            return ValidationError(message: message)
-        }
-        return nil
-    }
-
-    private func validateStringLength(_ string: String) -> ValidationError? {
-        if Double(string.count) < minValue - epsilon {
+        if number > maxBytes + epsilon {
             return ValidationError(message: message)
         }
         return nil
