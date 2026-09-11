@@ -1,0 +1,22 @@
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+
+# Rules tuned or disabled for this project, and why:
+#
+# - line_length: several messages in Sources/ValidatorKit/Rules are built via a single
+#   ValidationMessage.message(for:defaultMessage:dynamicValues:) call and legitimately run
+#   past the default 120-column warning (the longest line here is 234 characters). Rather
+#   than disabling the rule outright, the warning threshold is raised to comfortably cover
+#   these call sites while still catching genuinely runaway lines.
+line_length:
+  warning: 250
+
+identifier_name:
+  excluded:
+    # `DateRange.to` is public API (see Sources/ValidatorKit/Rules/DateRule.swift);
+    # renaming it to satisfy the default min-length would be a breaking change for consumers.
+    - to

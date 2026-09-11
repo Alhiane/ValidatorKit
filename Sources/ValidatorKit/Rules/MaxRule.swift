@@ -12,7 +12,7 @@ public struct MaxRule: ValidationRule {
 
     public init(value: Double, message: String? = nil) {
         self.maxValue = value
-        self.message = message ?? ValidationMessage.message(for: ValidationMessage.maxKey, defaultMessage: ValidationMessage.max,dynamicValues: [String(value)])
+        self.message = message ?? ValidationMessage.message(for: ValidationMessage.maxKey, defaultMessage: ValidationMessage.max, dynamicValues: [String(value)])
     }
 
     public func validate(_ value: Any?) -> ValidationError? {
