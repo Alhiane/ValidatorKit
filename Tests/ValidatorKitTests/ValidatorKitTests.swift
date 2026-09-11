@@ -46,6 +46,44 @@ struct RulesTests {
         assert(rule.validate("5") == nil)
         assert(rule.validate("123456") != nil)
     }
+    
+    @Test("Min Rule for String Length with Emoji")
+    func testMinRuleForStringWithEmoji() {
+        let rule = MinRule(value: 2)
+        // Flag emoji (regional indicator symbols) - counts as 2 grapheme clusters
+        assert(rule.validate("🇺🇸") == nil)
+        // Single emoji - counts as 1 grapheme cluster
+        assert(rule.validate("😀") != nil)
+    }
+    
+    @Test("Max Rule for String Length with Emoji")
+    func testMaxRuleForStringWithEmoji() {
+        let rule = MaxRule(value: 3)
+        // Flag emoji - counts as 2 grapheme clusters
+        assert(rule.validate("🇺🇸") == nil)
+        // ZWJ sequence (family emoji) - counts as 1 grapheme cluster
+        assert(rule.validate("👨‍👩‍👧‍👦") == nil)
+        // Multiple emojis - counts as 3 grapheme clusters
+        assert(rule.validate("😀😁😂") == nil)
+        // Too many - counts as 4 grapheme clusters
+        assert(rule.validate("😀😁😂🤣") != nil)
+    }
+    
+    @Test("Min/Max Rule with Combining Diacritics")
+    func testMinMaxRuleWithCombiningDiacritics() {
+        let minRule = MinRule(value: 1)
+        let maxRule = MaxRule(value: 5)
+        
+        // Base character + combining diacritic - counts as 1 grapheme cluster
+        let combined = "e\u{0301}" // é as e + combining acute accent
+        assert(minRule.validate(combined) == nil)
+        assert(maxRule.validate(combined) == nil)
+        
+        // Arabic text with combining marks
+        let arabic = "مَرْحَبًا" // "hello" in Arabic with diacritics
+        assert(maxRule.validate(arabic) == nil)
+        assert(minRule.validate(arabic) == nil)
+    }
     @Test("Multi Rules") func testMultipleRulesPerField()  {
         let schema = ValidationSchema()
             .field("password")
