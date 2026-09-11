@@ -21,10 +21,12 @@ public struct MinRule: ValidationRule {
             return ValidationError(message: ValidationMessage.message(for: ValidationMessage.notNullKey, defaultMessage: ValidationMessage.notNull))
         }
 
-        // Check if the value is a numeric string
-        if let stringValue = value as? String, let numericValue = Double(stringValue) {
-            // Treat numeric string as a number and apply numeric validation
-            return validateNumeric(numericValue)
+        if let stringValue = value as? String {
+            if let numericValue = Double(stringValue) {
+                // Preserve numeric-string behavior.
+                return validateNumeric(numericValue)
+            }
+            return validateStringLength(stringValue)
         }
 
         // Handle actual numeric types (Int or Double)
@@ -40,6 +42,13 @@ public struct MinRule: ValidationRule {
 
     private func validateNumeric(_ number: Double) -> ValidationError? {
         if number < minValue - epsilon {
+            return ValidationError(message: message)
+        }
+        return nil
+    }
+
+    private func validateStringLength(_ string: String) -> ValidationError? {
+        if Double(string.count) < minValue - epsilon {
             return ValidationError(message: message)
         }
         return nil
