@@ -101,10 +101,11 @@ struct SchemaTests {
 
         let invalidResult = schema.validate(invalidData)
          assert(!invalidResult.isValid)
-        
-         assert(invalidResult.errors.count == 2)
+
+         assert(invalidResult.errors.count == 3)
          assert(invalidResult.errors["username"] != nil)
          assert(invalidResult.errors["email"] != nil)
+         assert(invalidResult.errors["gender"] != nil)
     }
 }
 
@@ -142,7 +143,24 @@ struct ChainedFieldsTests {
 
         let invalidResult = schema.validate(invalidData)
          assert(!invalidResult.isValid)
-         assert(invalidResult.errors.count == 2)
+         assert(invalidResult.errors.count == 3)
+         assert(invalidResult.errors["habbites"] != nil)
+    }
+}
+
+@Suite("Missing Key Validation")
+struct MissingKeyValidationTests {
+    @Test("Required field with entirely missing key fails validation")
+    func testRequiredFieldMissingKeyFails() {
+        let schema = ValidationSchema()
+            .field("name").required()
+            .ready()
+
+        // Note: the key "name" is entirely absent here, not just an empty string.
+        let result = schema.validate([:])
+
+        assert(!result.isValid)
+        assert(result.errors["name"] != nil)
     }
 }
 
