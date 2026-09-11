@@ -50,6 +50,33 @@ struct RulesTests {
         assert(rule.validate("abcde") == nil)
         assert(rule.validate("abcdef") != nil)
     }
+    @Test("Phone Number Rule") func testPhoneNumberRule() {
+        let rule = PhoneNumberRule()
+        assert(rule.validate("+14155552671") == nil)
+        assert(rule.validate("+1 (415) 555-2671") == nil)
+        assert(rule.validate("12345") != nil)
+        assert(rule.validate("+1415abc2671") != nil)
+        assert(rule.validate(nil) != nil)
+    }
+
+    @Test("Credit Card Rule") func testCreditCardRule() {
+        let rule = CreditCardRule()
+        assert(rule.validate("4111111111111111") == nil)
+        assert(rule.validate("4111 1111 1111 1111") == nil)
+        assert(rule.validate("4111111111111112") != nil)
+        assert(rule.validate("not-a-card") != nil)
+        assert(rule.validate(nil) != nil)
+    }
+
+    @Test("IBAN Rule") func testIBANRule() {
+        let rule = IBANRule()
+        assert(rule.validate("GB82WEST12345698765432") == nil)
+        assert(rule.validate("GB82 WEST 1234 5698 7654 32") == nil)
+        assert(rule.validate("GB82WEST12345698765431") != nil)
+        assert(rule.validate("not-an-iban") != nil)
+        assert(rule.validate(nil) != nil)
+    }
+
     @Test("File Size Rule")
     func testFileSizeRule() {
         let rule = FileSizeRule(maxBytes: 5_000_000)

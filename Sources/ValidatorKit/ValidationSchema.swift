@@ -143,6 +143,24 @@ public class FieldValidator {
     }
 
     @discardableResult
+    public func phoneNumber(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(PhoneNumberRule(message: message)))
+        return self
+    }
+
+    @discardableResult
+    public func creditCard(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(CreditCardRule(message: message)))
+        return self
+    }
+
+    @discardableResult
+    public func IBAN(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(IBANRule(message: message)))
+        return self
+    }
+
+    @discardableResult
     public func maxFileSize(_ bytes: Int, message: String? = nil) -> FieldValidator {
         schema.addRule(name, AnyValidationRule(FileSizeRule(maxBytes: bytes, message: message)))
         return self

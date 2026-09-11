@@ -34,6 +34,9 @@ struct ValidationMessage {
     static let invalidValue = "Invalid value"
     static let dateRangeTooEarly = "Date must not be earlier than %@."
     static let dateRangeTooLate = "Date must not be later than %@."
+    static let phoneNumber = "Please enter a valid phone number."
+    static let creditCard = "Please enter a valid credit card number."
+    static let iban = "Please enter a valid IBAN."
     static let passwordStrength = "Password does not meet the required strength."
 
     // Localization keys
@@ -62,6 +65,9 @@ struct ValidationMessage {
     static let dateFormatKey = "validation.date.format"
     static let dateRangeTooEarlyKey = "validation.date.tooEarly"
     static let dateRangeTooLateKey = "validation.date.tooLate"
+    static let phoneNumberKey = "validation.phoneNumber"
+    static let creditCardKey = "validation.creditCard"
+    static let ibanKey = "validation.iban"
     static let passwordStrengthKey = "validation.passwordStrength"
 
     // Method to retrieve localized message or fallback to default

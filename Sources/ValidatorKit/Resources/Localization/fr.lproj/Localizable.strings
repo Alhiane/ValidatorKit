@@ -21,6 +21,9 @@
 "validation.greaterThan" = "La valeur doit être supérieure à %@.";
 "validation.lessThan" = "La valeur doit être inférieure à %@.";
 "validation.mimeTypes" = "Le type de fichier doit être l'un des types autorisés : %@.";
+"validation.phoneNumber" = "Veuillez saisir un numéro de téléphone valide.";
+"validation.creditCard" = "Veuillez saisir un numéro de carte de crédit valide.";
+"validation.iban" = "Veuillez saisir un IBAN valide.";
 "validation.fileSize" = "La taille du fichier ne doit pas dépasser %@ octets.";
 "validation.passwordStrength" = "Le mot de passe ne respecte pas le niveau de sécurité requis.";
 
