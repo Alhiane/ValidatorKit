@@ -59,7 +59,7 @@ struct ValidationMessage {
     static let dateFormatKey = "validation.date.format"
     static let dateRangeTooEarlyKey = "validation.date.tooEarly"
     static let dateRangeTooLateKey = "validation.date.tooLate"
-    
+
     // Method to retrieve localized message or fallback to default
     public static func message(for key: String, defaultMessage: String, dynamicValues: [CVarArg] = []) -> String {
             let bundle = Bundle.module // Use the current module's bundle

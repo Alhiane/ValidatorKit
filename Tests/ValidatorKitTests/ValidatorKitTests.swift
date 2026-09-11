@@ -25,32 +25,32 @@ struct RulesTests {
         assert(rule.validate(15) != nil)
         assert(rule.validate(18.00) != nil)
     }
-    
+
     @Test("Min Rule for String Length")
     func testMinRuleForString() {
         let rule = MinRule(value: 3)
         assert(rule.validate("123") == nil)
         assert(rule.validate("12") == nil)
     }
-    
+
     @Test("Max Rule for Int")
     func testMaxRuleForInt() {
         let rule = MaxRule(value: 100)
         assert(rule.validate(99) == nil)
         assert(rule.validate(101) != nil)
     }
-    
+
     @Test("Max Rule for String Length")
     func testMaxRuleForString() {
         let rule = MaxRule(value: 5)
         assert(rule.validate("5") == nil)
         assert(rule.validate("123456") != nil)
     }
-    @Test("Multi Rules") func testMultipleRulesPerField()  {
+    @Test("Multi Rules") func testMultipleRulesPerField() {
         let schema = ValidationSchema()
             .field("password")
                 .required()
-                .custom (message:  "Message here") { value in
+                .custom(message: "Message here") { value in
                     guard let password = value as? String, password.count >= 8 else {
                         return false
                     }
@@ -73,7 +73,7 @@ struct RulesTests {
 // schema
 @Suite("Schema Test")
 struct SchemaTests {
-    @Test("Schema Validation") func testValidationSchema()  {
+    @Test("Schema Validation") func testValidationSchema() {
         let username: String = "johndoe"
         let schema = ValidationSchema()
             .field("username").required()
@@ -117,7 +117,7 @@ struct ChainedFieldsTests {
             .field("username").required()
             .field("email").required().email()
             .field("habbites").required()
-            .field("age").required().custom(message:"Age Custom Validation") { value in
+            .field("age").required().custom(message: "Age Custom Validation") { value in
                 guard let age = value as? Int, age >= 18 else {
                     return false
                 }
@@ -134,7 +134,7 @@ struct ChainedFieldsTests {
 
         let validResult = schema.validate(validData)
          assert(validResult.isValid)
-        
+
         let invalidData: [String: Any] = [
             "username": "janedoe",
             "email": "not-an-email",
@@ -179,14 +179,14 @@ struct ValidationsMessagesTests {
         print(result.errors)
         assert(result.errors["email"]?.first == customMessage)
     }
-    
+
     // test range
     @Test("Range Rule with Custom Message") func testRangeRuleWithCustomMessage() {
 
         let schema = ValidationSchema()
             .field("number").range(1...10)
             .ready()
-        
+
         let invalidData = ["number": 21]
         let result = schema.validate(invalidData)
         assert(result.errors["number"]?.isEmpty == false)
@@ -232,7 +232,7 @@ struct DateRuleTests {
         let fromDate = dateFormatter.date(from: "2023-01-01")!
         let toDate = dateFormatter.date(from: "2023-12-31")!
         let rule = DateRule(range: DateRange(from: fromDate, to: toDate))
-        
+
         assert(rule.validate("2023-06-15") == nil)
         assert(rule.validate(dateFormatter.date(from: "2023-06-15")!) == nil)
     }
@@ -241,7 +241,7 @@ struct DateRuleTests {
     func testDateBeforeRange() {
         let fromDate = dateFormatter.date(from: "2023-01-01")!
         let rule = DateRule(range: DateRange(from: fromDate))
-        
+
         assert(rule.validate("2022-12-31") != nil)
         assert(rule.validate(dateFormatter.date(from: "2022-12-31")!) != nil)
     }
@@ -250,7 +250,7 @@ struct DateRuleTests {
     func testDateAfterRange() {
         let toDate = dateFormatter.date(from: "2023-12-31")!
         let rule = DateRule(range: DateRange(to: toDate))
-        
+
         assert(rule.validate("2024-01-01") != nil)
         assert(rule.validate(dateFormatter.date(from: "2024-01-01")!) != nil)
     }
