@@ -110,3 +110,14 @@ print(invalidResult.errors) // Display all errors
 | `leassThan(value)` | Validates that the value is less than the specified value. |
 | `MIMETypes(types)` | Validates that the file type matches one of the allowed MIME types. |
 
+
+
+## Length Validation and Grapheme Clusters
+
+ValidatorKit's length-based rules (`min`, `max`) use Swift's `String.count`, which counts **extended grapheme clusters**. This means:
+
+- Emoji are counted correctly as single characters (e.g., "😀" = 1, "🇺🇸" = 1)
+- Combining diacritics are handled properly (e.g., "e\u{0301}" = 1, not 2)
+- ZWJ sequences count as single characters (e.g., "👨‍👩‍👧‍👦" = 1)
+
+This is the correct behavior for user-facing validation, especially for internationalized applications using Arabic, Hebrew, or other languages with combining marks.

@@ -31,6 +31,8 @@ struct RulesTests {
         let rule = MinRule(value: 3)
         assert(rule.validate("123") == nil)
         assert(rule.validate("12") == nil)
+        assert(rule.validate("abc") == nil)
+        assert(rule.validate("ab") != nil)
     }
 
     @Test("Max Rule for Int")
@@ -45,6 +47,47 @@ struct RulesTests {
         let rule = MaxRule(value: 5)
         assert(rule.validate("5") == nil)
         assert(rule.validate("123456") != nil)
+        assert(rule.validate("abcde") == nil)
+        assert(rule.validate("abcdef") != nil)
+    }
+
+    @Test("Min Rule for String Length with Emoji")
+    func testMinRuleForStringWithEmoji() {
+        let rule = MinRule(value: 1)
+        // Flag emoji (regional indicator symbols) - counts as 1 grapheme cluster
+        assert(rule.validate("🇺🇸") == nil)
+        // Single emoji - counts as 1 grapheme cluster
+        assert(rule.validate("😀") == nil)
+        assert(rule.validate("") != nil)
+    }
+
+    @Test("Max Rule for String Length with Emoji")
+    func testMaxRuleForStringWithEmoji() {
+        let rule = MaxRule(value: 3)
+        // Flag emoji - counts as 1 grapheme cluster
+        assert(rule.validate("🇺🇸") == nil)
+        // ZWJ sequence (family emoji) - counts as 1 grapheme cluster
+        assert(rule.validate("👨‍👩‍👧‍👦") == nil)
+        // Multiple emojis - counts as 3 grapheme clusters
+        assert(rule.validate("😀😁😂") == nil)
+        // Too many - counts as 4 grapheme clusters
+        assert(rule.validate("😀😁😂🤣") != nil)
+    }
+
+    @Test("Min/Max Rule with Combining Diacritics")
+    func testMinMaxRuleWithCombiningDiacritics() {
+        let minRule = MinRule(value: 1)
+        let maxRule = MaxRule(value: 5)
+
+        // Base character + combining diacritic - counts as 1 grapheme cluster
+        let combined = "e\u{0301}" // é as e + combining acute accent
+        assert(minRule.validate(combined) == nil)
+        assert(maxRule.validate(combined) == nil)
+
+        // Arabic text with combining marks
+        let arabic = "مَرْحَبًا" // "hello" in Arabic with diacritics
+        assert(maxRule.validate(arabic) == nil)
+        assert(minRule.validate(arabic) == nil)
     }
     @Test("Multi Rules") func testMultipleRulesPerField() {
         let schema = ValidationSchema()
