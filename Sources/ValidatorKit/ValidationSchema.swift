@@ -143,6 +143,12 @@ public class FieldValidator {
     }
 
     @discardableResult
+    public func maxFileSize(_ bytes: Int, message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(FileSizeRule(maxBytes: bytes, message: message)))
+        return self
+    }
+
+    @discardableResult
     public func passwordStrength(
         minLength: Int = 8,
         requireUppercase: Bool = false,
