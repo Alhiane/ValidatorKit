@@ -45,6 +45,9 @@ let schema = ValidationSchema()
     .field("hobbies").inArray(["coding", "reading", "traveling"]) // Must be one of the allowed values
     .field("score").numeric().min(0).max(100) // Must be a number between 0 and 100
     .field("customField").pattern("^[A-Z]{3}-\\d{3}$") // Must match the pattern "XXX-123"
+    .field("phone").required().phoneNumber() // Must be a valid international phone number
+    .field("card").required().creditCard() // Must pass the Luhn checksum
+    .field("iban").required().IBAN() // Must be a valid IBAN
     .ready()
 
 // Example data for validation
@@ -60,7 +63,10 @@ let validData: [String: Any] = [
     "file": "image/jpeg",
     "hobbies": "coding",
     "score": 85,
-    "customField": "ABC-123"
+    "customField": "ABC-123",
+    "phone": "+14155552671",
+    "card": "4111111111111111",
+    "iban": "GB82WEST12345698765432"
 ]
 
 let invalidData: [String: Any] = [
@@ -75,7 +81,10 @@ let invalidData: [String: Any] = [
     "file": "text/plain",
     "hobbies": "sports",
     "score": 150,
-    "customField": "invalid"
+    "customField": "invalid",
+    "phone": "12345",
+    "card": "4111111111111112",
+    "iban": "not-an-iban"
 ]
 
 // Validate function
@@ -109,4 +118,7 @@ print(invalidResult.errors) // Display all errors
 | `greaterThan(value)` | Validates that the value is greater than the specified value. |
 | `leassThan(value)` | Validates that the value is less than the specified value. |
 | `MIMETypes(types)` | Validates that the file type matches one of the allowed MIME types. |
+| `phoneNumber()` | Validates a basic, E.164-ish international phone number format. |
+| `creditCard()` | Validates a credit card number using the Luhn checksum algorithm. |
+| `IBAN()`        | Validates an IBAN (International Bank Account Number) format and checksum. |
 
