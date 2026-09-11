@@ -33,6 +33,7 @@ struct ValidationMessage {
     static let invalidValue = "Invalid value"
     static let dateRangeTooEarly = "Date must not be earlier than %@."
     static let dateRangeTooLate = "Date must not be later than %@."
+    static let passwordStrength = "Password does not meet the required strength."
 
     // Localization keys
     static let customKey = "validation.custom"
@@ -59,6 +60,7 @@ struct ValidationMessage {
     static let dateFormatKey = "validation.date.format"
     static let dateRangeTooEarlyKey = "validation.date.tooEarly"
     static let dateRangeTooLateKey = "validation.date.tooLate"
+    static let passwordStrengthKey = "validation.passwordStrength"
 
     // Method to retrieve localized message or fallback to default
     public static func message(for key: String, defaultMessage: String, dynamicValues: [CVarArg] = []) -> String {

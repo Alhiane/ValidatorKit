@@ -33,12 +33,7 @@ let schema = ValidationSchema()
     .field("gender").requiredIf(username == "johndoe") // Required if username is "johndoe"
     .field("age").required().greaterThan(18) // Must be greater than 18
     .field("amount").numeric().min(100.08) // Must be a number and at least 100.08
-    .field("password").required().custom(message: "Password must be at least 8 characters") { value in
-        guard let password = value as? String, password.count >= 8 else {
-            return false
-        }
-        return true
-    }
+    .field("password").required().passwordStrength(minLength: 8, requireUppercase: true, requireDigit: true, requireSymbol: true) // Must meet the configured strength requirements
     .field("url").required().URL() // Must be a valid URL
     .field("dateOfBirth").required().date() // Must be a valid date
     .field("file").required().MIMETypes(["image/jpeg", "image/png"]) // Must be a valid file type
@@ -54,7 +49,7 @@ let validData: [String: Any] = [
     "gender": "male",
     "age": 25,
     "amount": "150.00",
-    "password": "securePassword123",
+    "password": "SecurePassword123!",
     "url": "https://example.com",
     "dateOfBirth": Date(),
     "file": "image/jpeg",
@@ -109,4 +104,5 @@ print(invalidResult.errors) // Display all errors
 | `greaterThan(value)` | Validates that the value is greater than the specified value. |
 | `leassThan(value)` | Validates that the value is less than the specified value. |
 | `MIMETypes(types)` | Validates that the file type matches one of the allowed MIME types. |
+| `passwordStrength(...)` | Validates that the value meets a minimum length and any enabled character-class requirements (uppercase, lowercase, digit, symbol). |
 
