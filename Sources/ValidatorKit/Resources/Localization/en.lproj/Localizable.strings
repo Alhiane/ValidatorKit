@@ -21,4 +21,5 @@
 "validation.greaterThan" = "Value must be greater than %@.";
 "validation.lessThan" = "Value must be less than %@.";
 "validation.mimeTypes" = "File type must be one of the allowed types: %@.";
+"validation.passwordStrength" = "Password does not meet the required strength.";
 

@@ -21,4 +21,5 @@
 "validation.greaterThan" = "يجب أن تكون القيمة أكبر من %@.";
 "validation.lessThan" = "يجب أن تكون القيمة أقل من %@.";
 "validation.mimeTypes" = "يجب أن يكون نوع الملف واحدًا من الأنواع المسموح بها: %@.";
+"validation.passwordStrength" = "كلمة المرور لا تستوفي متطلبات القوة المطلوبة.";
 

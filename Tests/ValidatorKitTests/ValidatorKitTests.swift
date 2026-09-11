@@ -89,6 +89,30 @@ struct RulesTests {
         assert(maxRule.validate(arabic) == nil)
         assert(minRule.validate(arabic) == nil)
     }
+    @Test("Password Strength Rule passes when all requirements are met")
+    func testPasswordStrengthRuleAllRequirementsMet() {
+        let rule = PasswordStrengthRule(minLength: 8, requireUppercase: true, requireLowercase: true, requireDigit: true, requireSymbol: true)
+        assert(rule.validate("Passw0rd!") == nil)
+    }
+
+    @Test("Password Strength Rule fails when too short")
+    func testPasswordStrengthRuleTooShort() {
+        let rule = PasswordStrengthRule(minLength: 8)
+        assert(rule.validate("Pw0!") != nil)
+    }
+
+    @Test("Password Strength Rule fails when a required character class is missing")
+    func testPasswordStrengthRuleMissingRequiredClass() {
+        let rule = PasswordStrengthRule(minLength: 8, requireUppercase: true, requireDigit: true, requireSymbol: true)
+        assert(rule.validate("lowercase123!") != nil)
+    }
+
+    @Test("Password Strength Rule passes when an unrequired character class is missing")
+    func testPasswordStrengthRuleUnrequiredClassMissing() {
+        let rule = PasswordStrengthRule(minLength: 8, requireUppercase: false, requireSymbol: false)
+        assert(rule.validate("alllowercase123") == nil)
+    }
+
     @Test("Multi Rules") func testMultipleRulesPerField() {
         let schema = ValidationSchema()
             .field("password")

@@ -142,6 +142,19 @@ public class FieldValidator {
         return self
     }
 
+    @discardableResult
+    public func passwordStrength(
+        minLength: Int = 8,
+        requireUppercase: Bool = false,
+        requireLowercase: Bool = false,
+        requireDigit: Bool = false,
+        requireSymbol: Bool = false,
+        message: String? = nil
+    ) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(PasswordStrengthRule(minLength: minLength, requireUppercase: requireUppercase, requireLowercase: requireLowercase, requireDigit: requireDigit, requireSymbol: requireSymbol, message: message)))
+        return self
+    }
+
     // return schema
     @discardableResult
     public func ready() -> ValidationSchema {
