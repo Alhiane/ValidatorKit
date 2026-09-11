@@ -8,7 +8,7 @@ import Foundation
 
 public struct ValidationError: Error, Equatable {
     public let message: String
-    
+
     public init(message: String) {
         self.message = message
     }
