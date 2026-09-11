@@ -123,3 +123,26 @@ print(result.errors["name"]!) // ["This field is required."]
 | `leassThan(value)` | Validates that the value is less than the specified value. |
 | `MIMETypes(types)` | Validates that the file type matches one of the allowed MIME types. |
 
+
+
+## Length Validation and Grapheme Clusters
+
+ValidatorKit's length-based rules (`min`, `max`) use Swift's `String.count`, which counts **extended grapheme clusters**. This means:
+
+- Emoji are counted correctly as single characters (e.g., "😀" = 1, "🇺🇸" = 1)
+- Combining diacritics are handled properly (e.g., "e\u{0301}" = 1, not 2)
+- ZWJ sequences count as single characters (e.g., "👨‍👩‍👧‍👦" = 1)
+
+This is the correct behavior for user-facing validation, especially for internationalized applications using Arabic, Hebrew, or other languages with combining marks.
+
+## Releasing
+
+Releases follow [Semantic Versioning](https://semver.org/). Every pull request should carry exactly one of the `major`, `minor`, or `patch` labels, describing the size of its change:
+
+| Label | When to use it |
+|-------|-----------------|
+| `major` | Breaking API change (`x.0.0`) |
+| `minor` | New backwards-compatible feature (`0.x.0`) |
+| `patch` | Backwards-compatible bug fix or tweak (`0.0.x`) |
+
+On every merge to `master`, [Release Drafter](https://github.com/release-drafter/release-drafter) updates a **draft** GitHub Release: it resolves the next version from the merged PRs' labels (highest bump wins) and compiles a changelog from their titles. Nothing is published automatically — review the draft under [Releases](../../releases) and publish it (which also creates the `vX.Y.Z` git tag SPM consumers pin to) whenever you're ready to ship.
