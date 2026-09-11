@@ -90,6 +90,19 @@ print(invalidResult.isValid) // false
 print(invalidResult.errors) // Display all errors
 ```
 
+`required()` also catches a field whose key is missing entirely from the
+input, not just an empty value:
+
+```swift
+let nameSchema = ValidationSchema()
+    .field("name").required()
+    .ready()
+
+let result = nameSchema.validate([:]) // "name" key is absent, not just empty
+print(result.isValid) // false
+print(result.errors["name"]!) // ["This field is required."]
+```
+
 ## Rules
 
 | Rule Name      | Description                                           |
