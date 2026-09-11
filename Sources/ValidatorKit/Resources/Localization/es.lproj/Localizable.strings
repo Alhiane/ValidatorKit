@@ -22,3 +22,4 @@
 "validation.lessThan" = "El valor debe ser menor que %@.";
 "validation.mimeTypes" = "El tipo de archivo debe ser uno de los tipos permitidos: %@.";
 "validation.fileSize" = "El tamaño del archivo no debe exceder %@ bytes.";
+"validation.passwordStrength" = "La contraseña no cumple con el nivel de seguridad requerido.";

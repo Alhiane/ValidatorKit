@@ -31,6 +31,8 @@ struct RulesTests {
         let rule = MinRule(value: 3)
         assert(rule.validate("123") == nil)
         assert(rule.validate("12") == nil)
+        assert(rule.validate("abc") == nil)
+        assert(rule.validate("ab") != nil)
     }
 
     @Test("Max Rule for Int")
@@ -45,6 +47,8 @@ struct RulesTests {
         let rule = MaxRule(value: 5)
         assert(rule.validate("5") == nil)
         assert(rule.validate("123456") != nil)
+        assert(rule.validate("abcde") == nil)
+        assert(rule.validate("abcdef") != nil)
     }
     @Test("File Size Rule")
     func testFileSizeRule() {
@@ -63,6 +67,68 @@ struct RulesTests {
 
         assert(schema.validate(["fileSize": 2_500_000]).isValid)
         assert(!schema.validate(["fileSize": 8_000_000]).isValid)
+    }
+
+    @Test("Min Rule for String Length with Emoji")
+    func testMinRuleForStringWithEmoji() {
+        let rule = MinRule(value: 1)
+        // Flag emoji (regional indicator symbols) - counts as 1 grapheme cluster
+        assert(rule.validate("🇺🇸") == nil)
+        // Single emoji - counts as 1 grapheme cluster
+        assert(rule.validate("😀") == nil)
+        assert(rule.validate("") != nil)
+    }
+
+    @Test("Max Rule for String Length with Emoji")
+    func testMaxRuleForStringWithEmoji() {
+        let rule = MaxRule(value: 3)
+        // Flag emoji - counts as 1 grapheme cluster
+        assert(rule.validate("🇺🇸") == nil)
+        // ZWJ sequence (family emoji) - counts as 1 grapheme cluster
+        assert(rule.validate("👨‍👩‍👧‍👦") == nil)
+        // Multiple emojis - counts as 3 grapheme clusters
+        assert(rule.validate("😀😁😂") == nil)
+        // Too many - counts as 4 grapheme clusters
+        assert(rule.validate("😀😁😂🤣") != nil)
+    }
+
+    @Test("Min/Max Rule with Combining Diacritics")
+    func testMinMaxRuleWithCombiningDiacritics() {
+        let minRule = MinRule(value: 1)
+        let maxRule = MaxRule(value: 5)
+
+        // Base character + combining diacritic - counts as 1 grapheme cluster
+        let combined = "e\u{0301}" // é as e + combining acute accent
+        assert(minRule.validate(combined) == nil)
+        assert(maxRule.validate(combined) == nil)
+
+        // Arabic text with combining marks
+        let arabic = "مَرْحَبًا" // "hello" in Arabic with diacritics
+        assert(maxRule.validate(arabic) == nil)
+        assert(minRule.validate(arabic) == nil)
+    }
+    @Test("Password Strength Rule passes when all requirements are met")
+    func testPasswordStrengthRuleAllRequirementsMet() {
+        let rule = PasswordStrengthRule(minLength: 8, requireUppercase: true, requireLowercase: true, requireDigit: true, requireSymbol: true)
+        assert(rule.validate("Passw0rd!") == nil)
+    }
+
+    @Test("Password Strength Rule fails when too short")
+    func testPasswordStrengthRuleTooShort() {
+        let rule = PasswordStrengthRule(minLength: 8)
+        assert(rule.validate("Pw0!") != nil)
+    }
+
+    @Test("Password Strength Rule fails when a required character class is missing")
+    func testPasswordStrengthRuleMissingRequiredClass() {
+        let rule = PasswordStrengthRule(minLength: 8, requireUppercase: true, requireDigit: true, requireSymbol: true)
+        assert(rule.validate("lowercase123!") != nil)
+    }
+
+    @Test("Password Strength Rule passes when an unrequired character class is missing")
+    func testPasswordStrengthRuleUnrequiredClassMissing() {
+        let rule = PasswordStrengthRule(minLength: 8, requireUppercase: false, requireSymbol: false)
+        assert(rule.validate("alllowercase123") == nil)
     }
 
     @Test("Multi Rules") func testMultipleRulesPerField() {
@@ -121,9 +187,10 @@ struct SchemaTests {
         let invalidResult = schema.validate(invalidData)
          assert(!invalidResult.isValid)
 
-         assert(invalidResult.errors.count == 2)
+         assert(invalidResult.errors.count == 3)
          assert(invalidResult.errors["username"] != nil)
          assert(invalidResult.errors["email"] != nil)
+         assert(invalidResult.errors["gender"] != nil)
     }
 }
 
@@ -161,7 +228,24 @@ struct ChainedFieldsTests {
 
         let invalidResult = schema.validate(invalidData)
          assert(!invalidResult.isValid)
-         assert(invalidResult.errors.count == 2)
+         assert(invalidResult.errors.count == 3)
+         assert(invalidResult.errors["habbites"] != nil)
+    }
+}
+
+@Suite("Missing Key Validation")
+struct MissingKeyValidationTests {
+    @Test("Required field with entirely missing key fails validation")
+    func testRequiredFieldMissingKeyFails() {
+        let schema = ValidationSchema()
+            .field("name").required()
+            .ready()
+
+        // Note: the key "name" is entirely absent here, not just an empty string.
+        let result = schema.validate([:])
+
+        assert(!result.isValid)
+        assert(result.errors["name"] != nil)
     }
 }
 
