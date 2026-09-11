@@ -7,7 +7,7 @@
 - Easy to use validation system
 - Ability to create custom validation rules
 - Support for multiple validation rules per field
-- Combine integration for reactive validation
+- SwiftUI/Combine live-binding validation is planned (tracked in #11)
 
 ## Installation
 
