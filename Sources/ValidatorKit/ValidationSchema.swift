@@ -124,9 +124,16 @@ public class FieldValidator {
         return self
     }
 
-    public func leassThan(_ value: Double, message: String? = nil) -> FieldValidator {
+    @discardableResult
+    public func lessThan(_ value: Double, message: String? = nil) -> FieldValidator {
         schema.addRule(name, AnyValidationRule(LessThanRule(maxValue: value, message: message)))
         return self
+    }
+
+    @available(*, deprecated, renamed: "lessThan")
+    @discardableResult
+    public func leassThan(_ value: Double, message: String? = nil) -> FieldValidator {
+        lessThan(value, message: message)
     }
 
     @discardableResult

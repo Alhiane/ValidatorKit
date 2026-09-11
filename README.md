@@ -120,7 +120,7 @@ print(result.errors["name"]!) // ["This field is required."]
 | `requiredIf(condition)` | Makes the field required based on a specified condition. |
 | `required()`   | Ensures the field is present and not empty.          |
 | `greaterThan(value)` | Validates that the value is greater than the specified value. |
-| `leassThan(value)` | Validates that the value is less than the specified value. |
+| `lessThan(value)` | Validates that the value is less than the specified value. |
 | `MIMETypes(types)` | Validates that the file type matches one of the allowed MIME types. |
 
 
