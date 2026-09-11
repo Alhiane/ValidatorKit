@@ -42,14 +42,6 @@ version-resolver:
       - 'patch'
   default: patch
 
-autolabeler:
-  - label: 'documentation'
-    files:
-      - '*.md'
-  - label: 'ci'
-    files:
-      - '.github/workflows/*'
-
 template: |
   ## ValidatorKit $RESOLVED_VERSION
 
