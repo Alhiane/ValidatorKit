@@ -64,7 +64,7 @@ struct RulesTests {
     @Test("Max Rule for String Length with Emoji")
     func testMaxRuleForStringWithEmoji() {
         let rule = MaxRule(value: 3)
-        // Flag emoji - counts as 2 grapheme clusters
+        // Flag emoji - counts as 1 grapheme cluster
         assert(rule.validate("🇺🇸") == nil)
         // ZWJ sequence (family emoji) - counts as 1 grapheme cluster
         assert(rule.validate("👨‍👩‍👧‍👦") == nil)
