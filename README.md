@@ -42,6 +42,7 @@ let schema = ValidationSchema()
     .field("url").required().URL() // Must be a valid URL
     .field("dateOfBirth").required().date() // Must be a valid date
     .field("file").required().MIMETypes(["image/jpeg", "image/png"]) // Must be a valid file type
+    .field("fileSize").required().maxFileSize(5_000_000) // Companion field holding the file's size in bytes; must not exceed 5 MB
     .field("hobbies").inArray(["coding", "reading", "traveling"]) // Must be one of the allowed values
     .field("score").numeric().min(0).max(100) // Must be a number between 0 and 100
     .field("customField").pattern("^[A-Z]{3}-\\d{3}$") // Must match the pattern "XXX-123"
@@ -58,6 +59,7 @@ let validData: [String: Any] = [
     "url": "https://example.com",
     "dateOfBirth": Date(),
     "file": "image/jpeg",
+    "fileSize": 2_500_000,
     "hobbies": "coding",
     "score": 85,
     "customField": "ABC-123"
@@ -73,6 +75,7 @@ let invalidData: [String: Any] = [
     "url": "invalid-url",
     "dateOfBirth": "not-a-date",
     "file": "text/plain",
+    "fileSize": 8_000_000,
     "hobbies": "sports",
     "score": 150,
     "customField": "invalid"
@@ -109,4 +112,5 @@ print(invalidResult.errors) // Display all errors
 | `greaterThan(value)` | Validates that the value is greater than the specified value. |
 | `leassThan(value)` | Validates that the value is less than the specified value. |
 | `MIMETypes(types)` | Validates that the file type matches one of the allowed MIME types. |
+| `maxFileSize(bytes)` | Ensures a numeric field (file size in bytes) does not exceed the specified maximum. |
 

@@ -46,6 +46,25 @@ struct RulesTests {
         assert(rule.validate("5") == nil)
         assert(rule.validate("123456") != nil)
     }
+    @Test("File Size Rule")
+    func testFileSizeRule() {
+        let rule = FileSizeRule(maxBytes: 5_000_000)
+        assert(rule.validate(4_999_999) == nil)
+        assert(rule.validate(5_000_000) == nil)
+        assert(rule.validate(5_000_001) != nil)
+        assert(rule.validate("not-a-number") != nil)
+    }
+
+    @Test("Max File Size via Schema")
+    func testMaxFileSizeSchema() {
+        let schema = ValidationSchema()
+            .field("fileSize").maxFileSize(5_000_000)
+            .ready()
+
+        assert(schema.validate(["fileSize": 2_500_000]).isValid)
+        assert(!schema.validate(["fileSize": 8_000_000]).isValid)
+    }
+
     @Test("Multi Rules") func testMultipleRulesPerField() {
         let schema = ValidationSchema()
             .field("password")

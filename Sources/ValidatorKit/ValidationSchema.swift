@@ -136,6 +136,12 @@ public class FieldValidator {
         return self
     }
 
+    @discardableResult
+    public func maxFileSize(_ bytes: Int, message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(FileSizeRule(maxBytes: bytes, message: message)))
+        return self
+    }
+
     // return schema
     @discardableResult
     public func ready() -> ValidationSchema {
