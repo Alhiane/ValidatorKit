@@ -58,6 +58,18 @@ Custom validation when a built-in rule isn't enough:
 }
 ```
 
+Async rules cover checks that need a server round-trip, like username availability — sync rules still run first, and a field's async rules are skipped if it already failed locally:
+
+```swift
+let schema = ValidationSchema()
+    .field("username").required().customAsync(message: "This username is already taken.") { value in
+        await api.isUsernameAvailable(value as? String ?? "")
+    }
+    .ready()
+
+let result = await schema.validateAsync(["username": "newuser"])
+```
+
 For the complete list of rules, localization details, and more examples, see the **[full docs](https://alhiane.com/open-source/validatorkit)**.
 
 ## Contributing

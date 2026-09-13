@@ -1,5 +1,6 @@
 public class ValidationSchema {
     private var rules: [String: [AnyValidationRule]] = [:]
+    private var asyncRules: [String: [AnyAsyncValidationRule]] = [:]
 
     public init() {}
 
@@ -22,11 +23,52 @@ public class ValidationSchema {
         return ValidationResult(errors: errors)
     }
 
+    /// Async variant of `validate(_:)` that also runs the `AsyncValidationRule`s
+    /// registered via `FieldValidator.customAsync(message:validation:)` and
+    /// `FieldValidator.asyncRule(_:)`.
+    ///
+    /// Sync rules run first, exactly as in `validate(_:)`. A field's async rules are
+    /// only awaited when all of its sync rules pass, so a cheap local failure
+    /// (e.g. a malformed or empty username) never triggers a remote check.
+    public func validateAsync(_ object: [String: Any]) async -> ValidationResult {
+        var errors: [String: [String]] = [:]
+
+        for (field, fieldRules) in rules {
+            let value = object[field]
+            let fieldErrors = fieldRules.compactMap { $0.validate(value) }
+            if !fieldErrors.isEmpty {
+                errors[field] = fieldErrors.map { $0.message }
+            }
+        }
+
+        for (field, fieldRules) in asyncRules where errors[field] == nil {
+            let value = object[field]
+            var fieldErrors: [ValidationError] = []
+            for rule in fieldRules {
+                if let error = await rule.validate(value) {
+                    fieldErrors.append(error)
+                }
+            }
+            if !fieldErrors.isEmpty {
+                errors[field] = fieldErrors.map { $0.message }
+            }
+        }
+
+        return ValidationResult(errors: errors)
+    }
+
     fileprivate func addRule(_ name: String, _ rule: AnyValidationRule) {
         if rules[name] == nil {
             rules[name] = []
         }
         rules[name]?.append(rule)
+    }
+
+    fileprivate func addAsyncRule(_ name: String, _ rule: AnyAsyncValidationRule) {
+        if asyncRules[name] == nil {
+            asyncRules[name] = []
+        }
+        asyncRules[name]?.append(rule)
     }
 }
 
@@ -179,6 +221,23 @@ public class FieldValidator {
         return self
     }
 
+    /// The async counterpart of `custom(message:validation:)`, for checks that must be
+    /// awaited — e.g. asking a backend whether a username or email is still available.
+    /// Only evaluated by `ValidationSchema.validateAsync(_:)`.
+    @discardableResult
+    public func customAsync(message: String, validation: @escaping (Any?) async -> Bool) -> FieldValidator {
+        schema.addAsyncRule(name, AnyAsyncValidationRule(CustomAsyncRule(validation: validation, message: message)))
+        return self
+    }
+
+    /// Registers any `AsyncValidationRule` conformance on this field.
+    /// Only evaluated by `ValidationSchema.validateAsync(_:)`.
+    @discardableResult
+    public func asyncRule<R: AsyncValidationRule>(_ rule: R) -> FieldValidator {
+        schema.addAsyncRule(name, AnyAsyncValidationRule(rule))
+        return self
+    }
+
     // return schema
     @discardableResult
     public func ready() -> ValidationSchema {
@@ -205,5 +264,20 @@ public struct CustomRule: ValidationRule {
 
     public func validate(_ value: Any?) -> ValidationError? {
         return validation(value) ? nil : ValidationError(message: message)
+    }
+}
+
+/// Closure-based `AsyncValidationRule`, the async counterpart of `CustomRule`.
+public struct CustomAsyncRule: AsyncValidationRule {
+    let validation: (Any?) async -> Bool
+    public let message: String
+
+    public init(validation: @escaping (Any?) async -> Bool, message: String? = nil) {
+        self.validation = validation
+        self.message = message ?? ValidationMessage.message(for: ValidationMessage.customKey, defaultMessage: ValidationMessage.custom)
+    }
+
+    public func validate(_ value: Any?) async -> ValidationError? {
+        return await validation(value) ? nil : ValidationError(message: message)
     }
 }
