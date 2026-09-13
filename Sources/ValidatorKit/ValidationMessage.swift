@@ -38,6 +38,9 @@ struct ValidationMessage {
     static let creditCard = "Please enter a valid credit card number."
     static let iban = "Please enter a valid IBAN."
     static let passwordStrength = "Password does not meet the required strength."
+    static let matchesField = "Value must match the %@ field."
+    static let dateBeforeField = "Date must be earlier than the %@ field."
+    static let dateAfterField = "Date must be later than the %@ field."
 
     // Localization keys
     static let customKey = "validation.custom"
@@ -69,6 +72,9 @@ struct ValidationMessage {
     static let creditCardKey = "validation.creditCard"
     static let ibanKey = "validation.iban"
     static let passwordStrengthKey = "validation.passwordStrength"
+    static let matchesFieldKey = "validation.matchesField"
+    static let dateBeforeFieldKey = "validation.dateBeforeField"
+    static let dateAfterFieldKey = "validation.dateAfterField"
 
     // Method to retrieve localized message or fallback to default
     public static func message(for key: String, defaultMessage: String, dynamicValues: [CVarArg] = []) -> String {
