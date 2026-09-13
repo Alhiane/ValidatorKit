@@ -30,7 +30,9 @@ public struct NotCommonPasswordRule: ValidationRule {
     public let message: String
 
     public init(commonPasswords: Set<String> = NotCommonPasswordRule.defaultCommonPasswords, message: String? = nil) {
-        self.commonPasswords = commonPasswords
+        // Normalise entries so matching is case-insensitive even when the
+        // caller supplies a mixed-case custom list (validate lowercases input).
+        self.commonPasswords = Set(commonPasswords.map { $0.lowercased() })
         self.message = message ?? ValidationMessage.message(for: ValidationMessage.notCommonPasswordKey, defaultMessage: ValidationMessage.notCommonPassword)
     }
 

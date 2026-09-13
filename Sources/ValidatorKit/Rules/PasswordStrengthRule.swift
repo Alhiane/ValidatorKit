@@ -12,6 +12,7 @@ public struct PasswordStrengthRule: ValidationRule {
     private let requireDigit: Bool
     private let requireSymbol: Bool
     private let rejectCommon: Bool
+    private let commonPasswordMessage: String
     public let message: String
 
     public init(
@@ -30,6 +31,7 @@ public struct PasswordStrengthRule: ValidationRule {
         self.requireSymbol = requireSymbol
         self.rejectCommon = rejectCommon
         self.message = message ?? ValidationMessage.message(for: ValidationMessage.passwordStrengthKey, defaultMessage: ValidationMessage.passwordStrength)
+        self.commonPasswordMessage = message ?? ValidationMessage.message(for: ValidationMessage.notCommonPasswordKey, defaultMessage: ValidationMessage.notCommonPassword)
     }
 
     public func validate(_ value: Any?) -> ValidationError? {
@@ -58,7 +60,7 @@ public struct PasswordStrengthRule: ValidationRule {
         }
 
         if rejectCommon && NotCommonPasswordRule.defaultCommonPasswords.contains(password.lowercased()) {
-            return ValidationError(message: message)
+            return ValidationError(message: commonPasswordMessage)
         }
 
         return nil

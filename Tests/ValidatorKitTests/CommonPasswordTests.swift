@@ -48,6 +48,24 @@ struct CommonPasswordTests {
         assert(rule.validate("password") == nil) // built-in list no longer applies
     }
 
+    @Test("Not Common Password Rule matches a mixed-case custom list case-insensitively")
+    func testNotCommonPasswordRuleCustomListMixedCase() {
+        let rule = NotCommonPasswordRule(commonPasswords: ["Hunter2"])
+        assert(rule.validate("Hunter2") != nil)
+        assert(rule.validate("hunter2") != nil)
+        assert(rule.validate("HUNTER2") != nil)
+        assert(rule.validate("correct-horse-battery-staple") == nil)
+    }
+
+    @Test("Password Strength Rule returns the too-common message when rejecting a common password")
+    func testPasswordStrengthRuleRejectCommonMessage() {
+        let rule = PasswordStrengthRule(minLength: 8, rejectCommon: true)
+        assert(rule.validate("password")?.message == "Password is too common.")
+        // other strength failures keep the generic strength message
+        assert(rule.validate("s3cure!Pass") == nil)
+        assert(rule.validate("short")?.message == "Password does not meet the required strength.")
+    }
+
     @Test("Not Common Password via Schema")
     func testNotCommonPasswordSchema() {
         let schema = ValidationSchema()
