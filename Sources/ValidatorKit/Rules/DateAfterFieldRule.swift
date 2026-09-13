@@ -11,13 +11,18 @@ public struct DateAfterFieldRule: CrossFieldValidationRule {
     private let otherField: String
     private let format: String
     public let message: String
-    private let dateFormatter: DateFormatter
+    let dateFormatter: DateFormatter
 
     public init(otherField: String, format: String = "yyyy-MM-dd", message: String? = nil) {
         self.otherField = otherField
         self.format = format
         self.message = message ?? ValidationMessage.message(for: ValidationMessage.dateAfterFieldKey, defaultMessage: ValidationMessage.dateAfterField, dynamicValues: [otherField])
         self.dateFormatter = DateFormatter()
+        // Fixed machine-readable format: pin locale + calendar so parsing
+        // isn't affected by the device's current locale (e.g. ar_SA would
+        // silently parse "yyyy-MM-dd" against a non-Gregorian calendar).
+        self.dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        self.dateFormatter.calendar = Calendar(identifier: .gregorian)
         self.dateFormatter.dateFormat = format
     }
 

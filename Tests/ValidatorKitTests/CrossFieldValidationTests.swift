@@ -113,6 +113,33 @@ struct CrossFieldValidationTests {
         assert(!schema.validate(["startDate": "2023-06-15", "endDate": "2023-06-15"]).isValid)
     }
 
+    @Test("Date Field Rules pin a POSIX locale and Gregorian calendar")
+    func testDateFieldRulesPosixLocale() {
+        // A fixed machine-readable format must not follow Locale.current:
+        // under e.g. ar_SA an unpinned formatter silently parses "yyyy-MM-dd"
+        // into a non-Gregorian (wrong) date instead of failing.
+        for formatter in [
+            DateBeforeFieldRule(otherField: "endDate").dateFormatter,
+            DateAfterFieldRule(otherField: "startDate").dateFormatter
+        ] {
+            assert(formatter.locale?.identifier == "en_US_POSIX")
+            assert(formatter.calendar?.identifier == .gregorian)
+
+            let gregorianReference = DateFormatter()
+            gregorianReference.locale = Locale(identifier: "en_US_POSIX")
+            gregorianReference.calendar = Calendar(identifier: .gregorian)
+            gregorianReference.dateFormat = "yyyy-MM-dd"
+            assert(formatter.date(from: "2023-01-01") == gregorianReference.date(from: "2023-01-01"))
+
+            // sanity check that the assertion above can actually distinguish
+            // a locale-influenced parse from a Gregorian one
+            let localeInfluenced = DateFormatter()
+            localeInfluenced.locale = Locale(identifier: "ar_SA")
+            localeInfluenced.dateFormat = "yyyy-MM-dd"
+            assert(formatter.date(from: "2023-01-01") != localeInfluenced.date(from: "2023-01-01"))
+        }
+    }
+
     @Test("Date Field Rules with Custom Format")
     func testDateFieldRulesCustomFormat() {
         let schema = ValidationSchema()
