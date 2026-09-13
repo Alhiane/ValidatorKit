@@ -26,4 +26,4 @@
 "validation.iban" = "يرجى إدخال رقم آيبان (IBAN) صالح.";
 "validation.fileSize" = "يجب ألا يتجاوز حجم الملف %@ بايت.";
 "validation.passwordStrength" = "كلمة المرور لا تستوفي متطلبات القوة المطلوبة.";
-
+"validation.notCommonPassword" = "كلمة المرور شائعة جدًا.";

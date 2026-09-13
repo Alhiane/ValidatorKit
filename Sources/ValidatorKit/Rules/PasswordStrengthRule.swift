@@ -11,6 +11,7 @@ public struct PasswordStrengthRule: ValidationRule {
     private let requireLowercase: Bool
     private let requireDigit: Bool
     private let requireSymbol: Bool
+    private let rejectCommon: Bool
     public let message: String
 
     public init(
@@ -19,6 +20,7 @@ public struct PasswordStrengthRule: ValidationRule {
         requireLowercase: Bool = false,
         requireDigit: Bool = false,
         requireSymbol: Bool = false,
+        rejectCommon: Bool = false,
         message: String? = nil
     ) {
         self.minLength = minLength
@@ -26,6 +28,7 @@ public struct PasswordStrengthRule: ValidationRule {
         self.requireLowercase = requireLowercase
         self.requireDigit = requireDigit
         self.requireSymbol = requireSymbol
+        self.rejectCommon = rejectCommon
         self.message = message ?? ValidationMessage.message(for: ValidationMessage.passwordStrengthKey, defaultMessage: ValidationMessage.passwordStrength)
     }
 
@@ -51,6 +54,10 @@ public struct PasswordStrengthRule: ValidationRule {
         }
 
         if requireSymbol && !password.contains(where: { !$0.isLetter && !$0.isNumber }) {
+            return ValidationError(message: message)
+        }
+
+        if rejectCommon && NotCommonPasswordRule.defaultCommonPasswords.contains(password.lowercased()) {
             return ValidationError(message: message)
         }
 

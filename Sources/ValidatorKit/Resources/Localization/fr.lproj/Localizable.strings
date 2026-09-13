@@ -26,4 +26,4 @@
 "validation.iban" = "Veuillez saisir un IBAN valide.";
 "validation.fileSize" = "La taille du fichier ne doit pas dépasser %@ octets.";
 "validation.passwordStrength" = "Le mot de passe ne respecte pas le niveau de sécurité requis.";
-
+"validation.notCommonPassword" = "Le mot de passe est trop courant.";

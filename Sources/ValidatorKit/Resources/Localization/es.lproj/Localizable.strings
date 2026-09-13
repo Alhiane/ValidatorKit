@@ -26,3 +26,4 @@
 "validation.iban" = "Por favor, introduce un IBAN válido.";
 "validation.fileSize" = "El tamaño del archivo no debe exceder %@ bytes.";
 "validation.passwordStrength" = "La contraseña no cumple con el nivel de seguridad requerido.";
+"validation.notCommonPassword" = "La contraseña es demasiado común.";
