@@ -21,6 +21,7 @@ private final class TestForm: ObservableObject {
 /// scheduling jitter on a loaded CI runner: assertions that check "before the debounce"
 /// sleep for a small fraction of this interval, and assertions that check "after the
 /// debounce" sleep for several times it.
+@MainActor
 private let testDebounce: DispatchQueue.SchedulerTimeType.Stride = .milliseconds(300)
 
 @MainActor
