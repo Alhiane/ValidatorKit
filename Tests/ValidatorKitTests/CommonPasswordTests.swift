@@ -75,4 +75,16 @@ struct CommonPasswordTests {
         assert(schema.validate(["password": "letmein"]).isValid == false)
         assert(schema.validate(["password": "s3cure!Pass"]).isValid)
     }
+
+    @Test("Not Common Password via Schema honours a custom password list")
+    func testNotCommonPasswordSchemaCustomList() {
+        let schema = ValidationSchema()
+            .field("password").required().notCommonPassword(commonPasswords: ["hunter2"])
+            .ready()
+
+        // "hunter2" isn't in the default list, but is rejected via the custom list.
+        assert(schema.validate(["password": "hunter2"]).isValid == false)
+        // A default-list password is accepted since the custom list replaces it.
+        assert(schema.validate(["password": "password"]).isValid)
+    }
 }

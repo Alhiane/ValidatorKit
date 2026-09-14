@@ -282,8 +282,11 @@ public class FieldValidator {
     }
 
     @discardableResult
-    public func notCommonPassword(message: String? = nil) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(NotCommonPasswordRule(message: message)))
+    public func notCommonPassword(
+        commonPasswords: Set<String> = NotCommonPasswordRule.defaultCommonPasswords,
+        message: String? = nil
+    ) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(NotCommonPasswordRule(commonPasswords: commonPasswords, message: message)))
         return self
     }
 
