@@ -41,6 +41,43 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
+  build-ios:
+    name: Build (iOS Simulator)
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: List available schemes
+        run: xcodebuild -list
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild -scheme ValidatorKit-Package \
+            -destination 'generic/platform=iOS Simulator' \
+            build
+
+      - name: List available simulators
+        run: xcrun simctl list devices available
+
+      # `xcodebuild test` currently can't run ValidatorKitUIKitTests to completion:
+      # testValidateOnInputChangeEnabled calls UIControl.sendActions(for:), which
+      # requires a live UIApplication to dispatch target-action pairs. SPM test
+      # bundles have no host app, so the call silently no-ops and the following
+      # assert() crashes the whole xctest process. Tracked in #49. Building for
+      # testing still exercises the real iOS compile path for the test target.
+      - name: Build ValidatorKitUIKitTests for testing
+        run: |
+          xcodebuild build-for-testing \
+            -scheme ValidatorKit-Package \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -only-testing:ValidatorKitUIKitTests
+
   lint:
     name: SwiftLint
     runs-on: macos-15
