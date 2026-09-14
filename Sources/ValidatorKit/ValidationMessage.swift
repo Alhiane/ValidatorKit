@@ -41,6 +41,7 @@ struct ValidationMessage {
     static let matchesField = "Value must match the %@ field."
     static let dateBeforeField = "Date must be earlier than the %@ field."
     static let dateAfterField = "Date must be later than the %@ field."
+    static let notCommonPassword = "Password is too common."
 
     // Localization keys
     static let customKey = "validation.custom"
@@ -75,6 +76,7 @@ struct ValidationMessage {
     static let matchesFieldKey = "validation.matchesField"
     static let dateBeforeFieldKey = "validation.dateBeforeField"
     static let dateAfterFieldKey = "validation.dateAfterField"
+    static let notCommonPasswordKey = "validation.notCommonPassword"
 
     // Method to retrieve localized message or fallback to default
     public static func message(for key: String, defaultMessage: String, dynamicValues: [CVarArg] = []) -> String {

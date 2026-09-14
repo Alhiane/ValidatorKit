@@ -173,9 +173,24 @@ public class FieldValidator {
         requireLowercase: Bool = false,
         requireDigit: Bool = false,
         requireSymbol: Bool = false,
+        rejectCommon: Bool = false,
         message: String? = nil
     ) -> FieldValidator {
-        schema.addRule(name, AnyValidationRule(PasswordStrengthRule(minLength: minLength, requireUppercase: requireUppercase, requireLowercase: requireLowercase, requireDigit: requireDigit, requireSymbol: requireSymbol, message: message)))
+        schema.addRule(name, AnyValidationRule(PasswordStrengthRule(
+            minLength: minLength,
+            requireUppercase: requireUppercase,
+            requireLowercase: requireLowercase,
+            requireDigit: requireDigit,
+            requireSymbol: requireSymbol,
+            rejectCommon: rejectCommon,
+            message: message
+        )))
+        return self
+    }
+
+    @discardableResult
+    public func notCommonPassword(message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(NotCommonPasswordRule(message: message)))
         return self
     }
 

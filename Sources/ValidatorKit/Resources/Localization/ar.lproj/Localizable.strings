@@ -29,4 +29,4 @@
 "validation.matchesField" = "يجب أن تتطابق القيمة مع حقل %@.";
 "validation.dateBeforeField" = "يجب أن يكون التاريخ قبل حقل %@.";
 "validation.dateAfterField" = "يجب أن يكون التاريخ بعد حقل %@.";
-
+"validation.notCommonPassword" = "كلمة المرور شائعة جدًا.";

@@ -29,4 +29,4 @@
 "validation.matchesField" = "Value must match the %@ field.";
 "validation.dateBeforeField" = "Date must be earlier than the %@ field.";
 "validation.dateAfterField" = "Date must be later than the %@ field.";
-
+"validation.notCommonPassword" = "Password is too common.";
