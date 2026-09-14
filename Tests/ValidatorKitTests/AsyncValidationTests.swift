@@ -24,6 +24,21 @@ private final class AsyncProbe {
     func mark() { callCount += 1 }
 }
 
+/// Records the peak number of async rules in flight at the same time.
+private actor ConcurrencyProbe {
+    private(set) var maxInFlight = 0
+    private var inFlight = 0
+
+    func enter() {
+        inFlight += 1
+        maxInFlight = max(maxInFlight, inFlight)
+    }
+
+    func exit() {
+        inFlight -= 1
+    }
+}
+
 @Suite("Async Validation")
 struct AsyncValidationTests {
 
@@ -154,5 +169,87 @@ struct AsyncValidationTests {
         assert(!result.isValid)
         assert(result.errors["email"]?.isEmpty == false)
         assert(result.errors["username"] == ["This username is already taken."])
+    }
+
+    @Test("Async rules of different fields run concurrently")
+    func testFieldsValidateConcurrently() async {
+        let probe = ConcurrencyProbe()
+        let schema = ValidationSchema()
+            .field("a").customAsync(message: "a") { _ in
+                await probe.enter()
+                try? await Task.sleep(nanoseconds: 100_000_000)
+                await probe.exit()
+                return true
+            }
+            .field("b").customAsync(message: "b") { _ in
+                await probe.enter()
+                try? await Task.sleep(nanoseconds: 100_000_000)
+                await probe.exit()
+                return true
+            }
+            .field("c").customAsync(message: "c") { _ in
+                await probe.enter()
+                try? await Task.sleep(nanoseconds: 100_000_000)
+                await probe.exit()
+                return true
+            }
+            .ready()
+
+        let result = await schema.validateAsync(["a": "1", "b": "2", "c": "3"])
+        assert(result.isValid)
+        let maxInFlight = await probe.maxInFlight
+        assert(maxInFlight == 3)
+    }
+
+    @Test("Cancelling validateAsync stops pending async rules")
+    func testCancellationStopsPendingRules() async {
+        let probe = AsyncProbe()
+        let schema = ValidationSchema()
+            .field("username")
+            .customAsync(message: "first") { _ in
+                probe.mark()
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                return true
+            }
+            .customAsync(message: "second") { _ in
+                probe.mark()
+                return true
+            }
+            .customAsync(message: "third") { _ in
+                probe.mark()
+                return true
+            }
+            .ready()
+
+        let task = Task { await schema.validateAsync(["username": "x"]) }
+
+        // Wait until the first rule is definitely running, then cancel.
+        while probe.callCount == 0 {
+            try? await Task.sleep(nanoseconds: 1_000_000)
+        }
+        task.cancel()
+        _ = await task.value
+
+        assert(probe.callCount == 1)
+    }
+
+    /// Regression test for `ValidationSchema` being `@unchecked Sendable`: a
+    /// `@MainActor`-isolated caller (e.g. a SwiftUI view model) must be able to
+    /// `await validateAsync`. Without the conformance this test does not compile.
+    @MainActor
+    @Test("validateAsync can be awaited from MainActor-isolated code")
+    func testValidateAsyncFromMainActorContext() async {
+        let schema = ValidationSchema()
+            .field("username").required()
+            .customAsync(message: "This username is already taken.") { value in
+                (value as? String) != "taken"
+            }
+            .ready()
+
+        let taken = await schema.validateAsync(["username": "taken"])
+        assert(taken.errors["username"] == ["This username is already taken."])
+
+        let available = await schema.validateAsync(["username": "newuser"])
+        assert(available.isValid)
     }
 }
