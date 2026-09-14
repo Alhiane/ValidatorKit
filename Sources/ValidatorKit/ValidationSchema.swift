@@ -13,7 +13,7 @@ public class ValidationSchema {
 
         for (field, fieldRules) in rules {
             let value = object[field]
-            let fieldErrors = fieldRules.compactMap { $0.validate(value) }
+            let fieldErrors = fieldRules.compactMap { $0.validate(value, in: object) }
             if !fieldErrors.isEmpty {
                 errors[field] = fieldErrors.map { $0.message }
             }
@@ -191,6 +191,25 @@ public class FieldValidator {
     @discardableResult
     public func notCommonPassword(message: String? = nil) -> FieldValidator {
         schema.addRule(name, AnyValidationRule(NotCommonPasswordRule(message: message)))
+        return self
+    }
+
+    // cross-field rules
+    @discardableResult
+    public func matches(_ otherField: String, message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(MatchesFieldRule(otherField: otherField, message: message)))
+        return self
+    }
+
+    @discardableResult
+    public func dateBefore(_ otherField: String, format: String = "yyyy-MM-dd", message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(DateBeforeFieldRule(otherField: otherField, format: format, message: message)))
+        return self
+    }
+
+    @discardableResult
+    public func dateAfter(_ otherField: String, format: String = "yyyy-MM-dd", message: String? = nil) -> FieldValidator {
+        schema.addRule(name, AnyValidationRule(DateAfterFieldRule(otherField: otherField, format: format, message: message)))
         return self
     }
 

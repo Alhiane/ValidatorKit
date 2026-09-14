@@ -26,4 +26,7 @@
 "validation.iban" = "Please enter a valid IBAN.";
 "validation.fileSize" = "File size must not exceed %@ bytes.";
 "validation.passwordStrength" = "Password does not meet the required strength.";
+"validation.matchesField" = "Value must match the %@ field.";
+"validation.dateBeforeField" = "Date must be earlier than the %@ field.";
+"validation.dateAfterField" = "Date must be later than the %@ field.";
 "validation.notCommonPassword" = "Password is too common.";
