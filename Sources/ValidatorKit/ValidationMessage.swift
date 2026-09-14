@@ -38,6 +38,7 @@ struct ValidationMessage {
     static let creditCard = "Please enter a valid credit card number."
     static let iban = "Please enter a valid IBAN."
     static let passwordStrength = "Password does not meet the required strength."
+    static let notCommonPassword = "Password is too common."
 
     // Localization keys
     static let customKey = "validation.custom"
@@ -69,6 +70,7 @@ struct ValidationMessage {
     static let creditCardKey = "validation.creditCard"
     static let ibanKey = "validation.iban"
     static let passwordStrengthKey = "validation.passwordStrength"
+    static let notCommonPasswordKey = "validation.notCommonPassword"
 
     // Method to retrieve localized message or fallback to default
     public static func message(for key: String, defaultMessage: String, dynamicValues: [CVarArg] = []) -> String {

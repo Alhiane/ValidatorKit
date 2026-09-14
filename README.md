@@ -35,7 +35,7 @@ import ValidatorKit
 
 let schema = ValidationSchema()
     .field("email").required().email()
-    .field("password").required().passwordStrength(minLength: 8, requireDigit: true, requireSymbol: true)
+    .field("password").required().passwordStrength(minLength: 8, requireDigit: true, requireSymbol: true, rejectCommon: true)
     .field("age").required().greaterThan(18)
     .ready()
 
