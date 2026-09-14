@@ -16,6 +16,9 @@ let package = Package(
             name: "ValidatorKit",
             targets: ["ValidatorKit"]),
         .library(
+            name: "ValidatorKitSwiftUI",
+            targets: ["ValidatorKitSwiftUI"]),
+        .library(
             name: "ValidatorKitUIKit",
             targets: ["ValidatorKitUIKit"]),
     ],
@@ -27,12 +30,20 @@ let package = Package(
             ]
         ),
         .target(
+            name: "ValidatorKitSwiftUI",
+            dependencies: ["ValidatorKit"]
+        ),
+        .target(
             name: "ValidatorKitUIKit",
             dependencies: ["ValidatorKit"]
         ),
         .testTarget(
             name: "ValidatorKitTests",
             dependencies: ["ValidatorKit"]
+        ),
+        .testTarget(
+            name: "ValidatorKitSwiftUITests",
+            dependencies: ["ValidatorKitSwiftUI"]
         ),
         .testTarget(
             name: "ValidatorKitUIKitTests",

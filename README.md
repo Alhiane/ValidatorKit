@@ -118,6 +118,39 @@ if emailField.validate().isEmpty {
 
 For the complete list of rules, localization details, and more examples, see the **[full docs](https://alhiane.com/open-source/validatorkit)**.
 
+### SwiftUI
+
+The `ValidatorKitSwiftUI` product (a separate target, so the core stays Foundation-only) binds a schema to `@Published` form state with debounced, reactive re-validation:
+
+```swift
+import SwiftUI
+import ValidatorKit
+import ValidatorKitSwiftUI
+
+@MainActor
+final class SignUpForm: ObservableObject {
+    @Published var email = ""
+    let schema = ObservableValidationSchema(
+        schema: ValidationSchema().field("email").required().email().ready()
+    )
+
+    init() {
+        schema.bind("email", to: $email)
+    }
+}
+
+struct SignUpView: View {
+    @StateObject private var form = SignUpForm()
+
+    var body: some View {
+        TextField("Email", text: $form.email)
+        if let error = form.schema.errors(for: "email").first {
+            Text(error).foregroundColor(.red)
+        }
+    }
+}
+```
+
 ## Communication
 
 - 🐛 Found a bug? [Open an issue](https://github.com/Alhiane/ValidatorKit/issues/new)
