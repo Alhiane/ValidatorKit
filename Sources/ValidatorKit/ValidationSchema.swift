@@ -1,5 +1,10 @@
-public class ValidationSchema {
+/// A schema is built up through the `field(_:).rule()...` chain and is expected to
+/// stop mutating once `ready()` returns, before any validation runs. `@unchecked`
+/// is safe under that contract: without it a `@MainActor`-isolated schema (e.g. one
+/// stored on a view model) could not be sent into the nonisolated `validateAsync`.
+public class ValidationSchema: @unchecked Sendable {
     private var rules: [String: [AnyValidationRule]] = [:]
+    private var asyncRules: [String: [AnyAsyncValidationRule]] = [:]
 
     public init() {}
 
@@ -22,12 +27,100 @@ public class ValidationSchema {
         return ValidationResult(errors: errors)
     }
 
+    /// Async variant of `validate(_:)` that also runs the `AsyncValidationRule`s
+    /// registered via `FieldValidator.customAsync(message:validation:)` and
+    /// `FieldValidator.asyncRule(_:)`.
+    ///
+    /// Sync rules run first, exactly as in `validate(_:)`. A field's async rules are
+    /// only awaited when all of its sync rules pass, so a cheap local failure
+    /// (e.g. a malformed or empty username) never triggers a remote check.
+    ///
+    /// Async rules run concurrently across fields — each field gets its own child
+    /// task — while the rules of a single field still run sequentially in
+    /// registration order, preserving the order of that field's error messages.
+    /// `ValidationResult.errors` is keyed by field, so no cross-field ordering
+    /// is promised either way.
+    ///
+    /// Cancellation is cooperative: a cancelled task stops spawning field tasks
+    /// and stops running further rules on each field. In-flight rules observe
+    /// `Task.isCancelled == true`; because `AsyncValidationRule.validate` is
+    /// non-throwing they cannot propagate `CancellationError`, so a cancelled
+    /// `validateAsync` returns the errors collected so far rather than throwing.
+    public func validateAsync(_ object: [String: Any]) async -> ValidationResult {
+        var errors: [String: [String]] = [:]
+
+        for (field, fieldRules) in rules {
+            let value = object[field]
+            let fieldErrors = fieldRules.compactMap { $0.validate(value) }
+            if !fieldErrors.isEmpty {
+                errors[field] = fieldErrors.map { $0.message }
+            }
+        }
+
+        // Fields whose sync rules already failed skip their async rules entirely.
+        let pending = asyncRules.compactMap { field, fieldRules -> AsyncWorkItem? in
+            guard errors[field] == nil else { return nil }
+            return AsyncWorkItem(field: field, value: object[field], rules: fieldRules)
+        }
+
+        // One child task per field; each runs its rules sequentially so the
+        // field's messages keep registration order. Results are collected into
+        // a local dictionary — no shared mutable state across tasks.
+        let asyncErrors: [String: [String]] = await withTaskGroup(
+            of: (field: String, messages: [String]).self,
+            returning: [String: [String]].self
+        ) { group in
+            for workItem in pending {
+                if Task.isCancelled { break }
+                group.addTask {
+                    var messages: [String] = []
+                    for rule in workItem.rules {
+                        if Task.isCancelled { break }
+                        if let error = await rule.validate(workItem.value) {
+                            messages.append(error.message)
+                        }
+                    }
+                    return (workItem.field, messages)
+                }
+            }
+
+            var collected: [String: [String]] = [:]
+            for await (field, messages) in group where !messages.isEmpty {
+                collected[field] = messages
+            }
+            return collected
+        }
+
+        for (field, messages) in asyncErrors {
+            errors[field] = messages
+        }
+
+        return ValidationResult(errors: errors)
+    }
+
     fileprivate func addRule(_ name: String, _ rule: AnyValidationRule) {
         if rules[name] == nil {
             rules[name] = []
         }
         rules[name]?.append(rule)
     }
+
+    fileprivate func addAsyncRule(_ name: String, _ rule: AnyAsyncValidationRule) {
+        if asyncRules[name] == nil {
+            asyncRules[name] = []
+        }
+        asyncRules[name]?.append(rule)
+    }
+}
+
+/// A field's pending async validation work, captured by the child tasks spawned
+/// in `ValidationSchema.validateAsync(_:)`. The `Any?` value under test is not
+/// `Sendable`, hence `@unchecked`: safe here because the box is immutable and
+/// only ever read for the lifetime of the task group.
+private struct AsyncWorkItem: @unchecked Sendable {
+    let field: String
+    let value: Any?
+    let rules: [AnyAsyncValidationRule]
 }
 
 public class FieldValidator {
@@ -213,6 +306,23 @@ public class FieldValidator {
         return self
     }
 
+    /// The async counterpart of `custom(message:validation:)`, for checks that must be
+    /// awaited — e.g. asking a backend whether a username or email is still available.
+    /// Only evaluated by `ValidationSchema.validateAsync(_:)`.
+    @discardableResult
+    public func customAsync(message: String, validation: @escaping (Any?) async -> Bool) -> FieldValidator {
+        schema.addAsyncRule(name, AnyAsyncValidationRule(CustomAsyncRule(validation: validation, message: message)))
+        return self
+    }
+
+    /// Registers any `AsyncValidationRule` conformance on this field.
+    /// Only evaluated by `ValidationSchema.validateAsync(_:)`.
+    @discardableResult
+    public func asyncRule<R: AsyncValidationRule>(_ rule: R) -> FieldValidator {
+        schema.addAsyncRule(name, AnyAsyncValidationRule(rule))
+        return self
+    }
+
     // return schema
     @discardableResult
     public func ready() -> ValidationSchema {
@@ -220,7 +330,7 @@ public class FieldValidator {
     }
 }
 
-public struct ValidationResult {
+public struct ValidationResult: Sendable {
     public let errors: [String: [String]]
 
     public var isValid: Bool {
@@ -239,5 +349,20 @@ public struct CustomRule: ValidationRule {
 
     public func validate(_ value: Any?) -> ValidationError? {
         return validation(value) ? nil : ValidationError(message: message)
+    }
+}
+
+/// Closure-based `AsyncValidationRule`, the async counterpart of `CustomRule`.
+public struct CustomAsyncRule: AsyncValidationRule {
+    let validation: (Any?) async -> Bool
+    public let message: String
+
+    public init(validation: @escaping (Any?) async -> Bool, message: String? = nil) {
+        self.validation = validation
+        self.message = message ?? ValidationMessage.message(for: ValidationMessage.customKey, defaultMessage: ValidationMessage.custom)
+    }
+
+    public func validate(_ value: Any?) async -> ValidationError? {
+        return await validation(value) ? nil : ValidationError(message: message)
     }
 }
