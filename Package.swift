@@ -15,6 +15,9 @@ let package = Package(
         .library(
             name: "ValidatorKit",
             targets: ["ValidatorKit"]),
+        .library(
+            name: "ValidatorKitUIKit",
+            targets: ["ValidatorKitUIKit"]),
     ],
     targets: [
         .target(
@@ -23,9 +26,17 @@ let package = Package(
                 .process("Resources/Localization")
             ]
         ),
+        .target(
+            name: "ValidatorKitUIKit",
+            dependencies: ["ValidatorKit"]
+        ),
         .testTarget(
             name: "ValidatorKitTests",
             dependencies: ["ValidatorKit"]
+        ),
+        .testTarget(
+            name: "ValidatorKitUIKitTests",
+            dependencies: ["ValidatorKitUIKit"]
         ),
     ]
 )
