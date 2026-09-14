@@ -93,6 +93,29 @@ let schema = ValidationSchema()
 let result = await schema.validateAsync(["username": "newuser"])
 ```
 
+### UIKit
+
+`ValidatorKitUIKit` (a separate product, so the core library stays dependency-free) adds real-time validation to `UITextField` — attach rules, optionally re-validate as the user types, and observe results via a closure:
+
+```swift
+import ValidatorKitUIKit
+
+emailField.addRule(EmailRule())
+emailField.validateOnInputChange(isEnabled: true)
+emailField.validationHandler = { errors in
+    errorLabel.text = errors.first?.message
+    errorLabel.isHidden = errors.isEmpty
+}
+```
+
+`validate()` runs the attached rules on demand — regardless of `validateOnInputChange` — and also returns the errors directly:
+
+```swift
+if emailField.validate().isEmpty {
+    submit()
+}
+```
+
 For the complete list of rules, localization details, and more examples, see the **[full docs](https://alhiane.com/open-source/validatorkit)**.
 
 ## Communication
