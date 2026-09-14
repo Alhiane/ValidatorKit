@@ -14,8 +14,21 @@ public struct GreaterThanRule: ValidationRule {
     }
 
     public func validate(_ value: Any?) -> ValidationError? {
-        guard let doubleValue = value as? Double else { return ValidationError(message: ValidationMessage.message(for: ValidationMessage.invalidValueKey, defaultMessage: ValidationMessage.invalidValue)) }
-        if doubleValue <= minValue {
+        if let stringValue = value as? String, let numericValue = Double(stringValue) {
+            return validateNumeric(numericValue)
+        }
+
+        if let numberValue = value as? Double {
+            return validateNumeric(numberValue)
+        } else if let intValue = value as? Int {
+            return validateNumeric(Double(intValue))
+        }
+
+        return ValidationError(message: ValidationMessage.message(for: ValidationMessage.invalidValueKey, defaultMessage: ValidationMessage.invalidValue))
+    }
+
+    private func validateNumeric(_ number: Double) -> ValidationError? {
+        if number <= minValue {
             return ValidationError(message: message)
         }
         return nil
