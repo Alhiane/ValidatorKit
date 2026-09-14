@@ -141,4 +141,35 @@ struct ObservableValidationSchemaTests {
         assert(forced.isValid, "validateNow() should immediately reflect the latest captured value")
         assert(observable.isValid("age"))
     }
+
+    @Test("Public bind(_:to:debounce:) works against its default RunLoop.main scheduler")
+    func testPublicBindDefaultsToRunLoopMain() {
+        // Every other test in this file goes through the internal
+        // bind(_:to:debounce:scheduler:) overload with DispatchQueue.main, since
+        // RunLoop.main doesn't fire on its own in a headless test process (see the
+        // doc comment on `bind(_:to:debounce:)`). This test instead calls the public
+        // API exactly as a real app would -- no scheduler argument, so it defaults to
+        // RunLoop.main -- and drives that run loop directly so its debounce timer can
+        // actually fire.
+        var validationCount = 0
+        let schema = ValidationSchema()
+            .field("email").custom(message: "invalid") { value in
+                validationCount += 1
+                return (value as? String)?.contains("@") == true
+            }
+            .ready()
+
+        let form = TestForm()
+        let observable = ObservableValidationSchema(schema: schema)
+        observable.bind("email", to: form.$email, debounce: .milliseconds(150))
+
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4)) // let the initial subscription settle
+        validationCount = 0
+
+        form.email = "alice@example.com"
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4)) // past the 150ms debounce
+
+        assert(validationCount == 1, "expected exactly one re-validation via the default RunLoop.main scheduler")
+        assert(observable.isValid("email"))
+    }
 }
