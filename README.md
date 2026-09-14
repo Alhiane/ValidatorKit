@@ -15,7 +15,8 @@ A lightweight, fluent validation library for Swift — chainable rules, localize
 - **Fluent, chainable schemas** — describe every field's rules in one readable expression
 - **Zero dependencies** — pure Swift, Foundation only
 - **Localized out of the box** — error messages ship in English, Arabic, Spanish, and French
-- **20+ built-in rules** — email, phone, credit card (Luhn), IBAN, password strength, dates, regex, file size, and more
+- **25+ built-in rules** — email, phone, credit card (Luhn), IBAN, password strength, dates, regex, file size, and more
+- **Cross-field & async-ready** — confirm-password/date-range checks that see the whole object, plus async rules for server round-trips like username availability
 - **Works anywhere** — validate a decoded JSON payload, a form dictionary, or a view model's fields the same way
 
 ## Installation
@@ -56,6 +57,17 @@ Custom validation when a built-in rule isn't enough:
     guard let username = value as? String else { return false }
     return username == username.lowercased() && !username.contains(" ")
 }
+```
+
+Cross-field rules see the whole object being validated, not just their own field — useful for confirm-password fields or date ranges:
+
+```swift
+let schema = ValidationSchema()
+    .field("password").required()
+    .field("confirmPassword").required().matches("password")
+    .field("startDate").required().dateBefore("endDate")
+    .field("endDate").required().dateAfter("startDate")
+    .ready()
 ```
 
 Async rules cover checks that need a server round-trip, like username availability — sync rules still run first, and a field's async rules are skipped if it already failed locally:
