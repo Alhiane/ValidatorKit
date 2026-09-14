@@ -296,7 +296,7 @@ public class FieldValidator {
     }
 }
 
-public struct ValidationResult {
+public struct ValidationResult: Sendable {
     public let errors: [String: [String]]
 
     public var isValid: Bool {
