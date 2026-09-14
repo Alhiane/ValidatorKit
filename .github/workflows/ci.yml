@@ -22,8 +22,24 @@ jobs:
       - name: Build
         run: swift build -v
 
-      - name: Test
-        run: swift test -v
+      - name: Test with coverage
+        run: swift test -v --enable-code-coverage
+
+      - name: Export coverage as lcov
+        run: |
+          BIN_PATH="$(swift build --show-bin-path)"
+          XCTEST_PATH="$(find "$BIN_PATH" -name '*.xctest' | head -n 1)"
+          BINARY_PATH="$XCTEST_PATH/Contents/MacOS/$(basename "$XCTEST_PATH" .xctest)"
+          xcrun llvm-cov export -format="lcov" "$BINARY_PATH" \
+            -instr-profile "$BIN_PATH/codecov/default.profdata" > coverage.lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        with:
+          files: coverage.lcov
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   lint:
     name: SwiftLint

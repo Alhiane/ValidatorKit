@@ -3,9 +3,10 @@
 A lightweight, fluent validation library for Swift — chainable rules, localized error messages, zero dependencies.
 
 [![CI](https://github.com/Alhiane/ValidatorKit/actions/workflows/ci.yml/badge.svg)](https://github.com/Alhiane/ValidatorKit/actions/workflows/ci.yml)
-[![Swift 6.0](https://img.shields.io/badge/swift-6.0-orange.svg)](https://swift.org)
+[![codecov](https://codecov.io/gh/Alhiane/ValidatorKit/graph/badge.svg)](https://codecov.io/gh/Alhiane/ValidatorKit)
+[![Swift Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FAlhiane%2FValidatorKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Alhiane/ValidatorKit)
+[![Platform Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FAlhiane%2FValidatorKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Alhiane/ValidatorKit)
 [![SPM compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
-[![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-lightgrey.svg)](Package.swift)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 📖 **[Full documentation & rules reference](https://alhiane.com/open-source/validatorkit)**
@@ -18,6 +19,16 @@ A lightweight, fluent validation library for Swift — chainable rules, localize
 - **25+ built-in rules** — email, phone, credit card (Luhn), IBAN, password strength, dates, regex, file size, and more
 - **Cross-field & async-ready** — confirm-password/date-range checks that see the whole object, plus async rules for server round-trips like username availability
 - **Works anywhere** — validate a decoded JSON payload, a form dictionary, or a view model's fields the same way
+
+## Requirements
+
+| Platform | Minimum Version |
+|----------|------------------|
+| iOS      | 13.0+            |
+| macOS    | 10.15+           |
+| tvOS     | 13.0+            |
+| watchOS  | 6.0+             |
+| Swift    | 6.0+             |
 
 ## Installation
 
@@ -83,6 +94,12 @@ let result = await schema.validateAsync(["username": "newuser"])
 ```
 
 For the complete list of rules, localization details, and more examples, see the **[full docs](https://alhiane.com/open-source/validatorkit)**.
+
+## Communication
+
+- 🐛 Found a bug? [Open an issue](https://github.com/Alhiane/ValidatorKit/issues/new)
+- 💡 Have a feature request? [Open an issue](https://github.com/Alhiane/ValidatorKit/issues/new)
+- ❓ Questions? [Start a discussion](https://github.com/Alhiane/ValidatorKit/discussions)
 
 ## Contributing
 
