@@ -51,7 +51,7 @@ public class ValidationSchema: @unchecked Sendable {
 
         for (field, fieldRules) in rules {
             let value = object[field]
-            let fieldErrors = fieldRules.compactMap { $0.validate(value) }
+            let fieldErrors = fieldRules.compactMap { $0.validate(value, in: object) }
             if !fieldErrors.isEmpty {
                 errors[field] = fieldErrors.map { $0.message }
             }
