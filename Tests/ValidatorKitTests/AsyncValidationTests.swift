@@ -252,4 +252,18 @@ struct AsyncValidationTests {
         let available = await schema.validateAsync(["username": "newuser"])
         assert(available.isValid)
     }
+
+    @Test("validateAsync correctly evaluates cross-field rules (regression for #39)")
+    func testValidateAsyncEvaluatesCrossFieldRules() async {
+        let schema = ValidationSchema()
+            .field("password").required()
+            .field("confirmPassword").required().matches("password")
+            .ready()
+
+        let matching = await schema.validateAsync(["password": "secret123", "confirmPassword": "secret123"])
+        assert(matching.isValid)
+
+        let mismatched = await schema.validateAsync(["password": "secret123", "confirmPassword": "nope"])
+        assert(!mismatched.isValid)
+    }
 }
