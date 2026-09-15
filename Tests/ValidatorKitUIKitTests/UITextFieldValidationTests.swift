@@ -44,50 +44,61 @@ struct UITextFieldValidationTests {
         assert(field.validate().isEmpty)
     }
 
-    @Test("validateOnInputChange(isEnabled: true) re-validates on .editingChanged")
+    // NOTE on the four tests below: `UIControl.sendActions(for:)` requires a live
+    // `UIApplication` to actually dispatch target-action pairs. SPM test bundles
+    // have no host app, so the call silently no-ops instead of invoking the
+    // target — see #49. Rather than dispatch through `sendActions(for:)`, these
+    // tests verify the two things that actually matter and don't require a host
+    // app: (1) that `validateOnInputChange` registers/deregisters the
+    // `.editingChanged` target-action pair correctly (via
+    // `actions(forTarget:forControlEvent:)`), and (2) that the registered
+    // handler itself behaves correctly when invoked, using
+    // `perform(Selector(...))` to call the private `@objc` handler directly —
+    // Objective-C selector dispatch bypasses Swift's `private` access control,
+    // so this reaches the same method a real `.editingChanged` event would
+    // trigger, without needing `sendActions(for:)`/`UIApplication`.
+
+    @Test("validateOnInputChange(isEnabled: true) registers the action and re-validates when it fires")
     func testValidateOnInputChangeEnabled() {
         let field = UITextField()
         field.addRule(EmailRule())
+
+        assert(field.actions(forTarget: field, forControlEvent: .editingChanged) == nil)
+
         field.validateOnInputChange(isEnabled: true)
+
+        assert(field.actions(forTarget: field, forControlEvent: .editingChanged)?.count == 1)
 
         var received: [ValidationError]?
         field.validationHandler = { errors in received = errors }
 
         field.text = "not-an-email"
-        field.sendActions(for: .editingChanged)
+        field.perform(Selector(("validatorKit_handleEditingChanged")))
 
         assert(received != nil)
         assert(received?.count == 1)
     }
 
-    @Test("validateOnInputChange(isEnabled: false) does not auto-trigger validation on typing")
+    @Test("validateOnInputChange(isEnabled: false) removes the .editingChanged target-action registration")
     func testValidateOnInputChangeDisabled() {
         let field = UITextField()
         field.addRule(EmailRule())
         field.validateOnInputChange(isEnabled: true)
+        assert(field.actions(forTarget: field, forControlEvent: .editingChanged)?.count == 1)
+
         field.validateOnInputChange(isEnabled: false)
 
-        var received: [ValidationError]?
-        field.validationHandler = { errors in received = errors }
-
-        field.text = "not-an-email"
-        field.sendActions(for: .editingChanged)
-
-        assert(received == nil)
+        // A real .editingChanged event would now have no target-action pair to
+        // dispatch to, so typing would never auto-trigger validation.
+        assert(field.actions(forTarget: field, forControlEvent: .editingChanged) == nil)
     }
 
-    @Test("Never enabling validateOnInputChange means typing never auto-triggers validation")
+    @Test("Never enabling validateOnInputChange means no .editingChanged target-action is ever registered")
     func testValidateOnInputChangeNeverEnabled() {
         let field = UITextField()
         field.addRule(RequiredRule())
 
-        var received: [ValidationError]?
-        field.validationHandler = { errors in received = errors }
-
-        field.text = ""
-        field.sendActions(for: .editingChanged)
-
-        assert(received == nil)
+        assert(field.actions(forTarget: field, forControlEvent: .editingChanged) == nil)
     }
 
     @Test("validationHandler receives the result of a direct validate() call")
@@ -111,15 +122,19 @@ struct UITextFieldValidationTests {
         let field = UITextField()
         field.addRule(RequiredRule())
 
+        field.validateOnInputChange(isEnabled: true)
+        field.validateOnInputChange(isEnabled: true)
+        field.validateOnInputChange(isEnabled: true)
+
+        // Repeated enable calls must still leave exactly one target-action pair
+        // registered, not one per call.
+        assert(field.actions(forTarget: field, forControlEvent: .editingChanged)?.count == 1)
+
         var callCount = 0
         field.validationHandler = { _ in callCount += 1 }
 
-        field.validateOnInputChange(isEnabled: true)
-        field.validateOnInputChange(isEnabled: true)
-        field.validateOnInputChange(isEnabled: true)
-
         field.text = ""
-        field.sendActions(for: .editingChanged)
+        field.perform(Selector(("validatorKit_handleEditingChanged")))
 
         assert(callCount == 1)
     }
