@@ -52,28 +52,41 @@ struct UITextFieldValidationTests {
     // app: (1) that `validateOnInputChange` registers/deregisters the
     // `.editingChanged` target-action pair correctly (via
     // `actions(forTarget:forControlEvent:)`), and (2) that the registered
-    // handler itself behaves correctly when invoked, using
-    // `perform(Selector(...))` to call the private `@objc` handler directly —
-    // Objective-C selector dispatch bypasses Swift's `private` access control,
-    // so this reaches the same method a real `.editingChanged` event would
-    // trigger, without needing `sendActions(for:)`/`UIApplication`.
+    // handler itself behaves correctly when invoked, using `perform(Selector:)`
+    // with the *actual registered selector name* (never a hardcoded string) to
+    // call the private `@objc` handler directly — Objective-C selector dispatch
+    // bypasses Swift's `private` access control, so this reaches the same
+    // method a real `.editingChanged` event would trigger, without needing
+    // `sendActions(for:)`/`UIApplication`. Driving `perform` off the registered
+    // action (rather than a literal selector string) also ties the two checks
+    // together: the test only passes if the *actually-registered* action both
+    // exists and behaves correctly.
+
+    /// The `.editingChanged` action selector names currently registered with
+    /// `field` as their own target, or `[]` if none — `actions(forTarget:for
+    /// ControlEvent:)` returns `nil` for "no actions", so this normalizes that
+    /// away rather than asserting on `nil` vs. `[]` directly.
+    private func editingChangedActions(on field: UITextField) -> [String] {
+        field.actions(forTarget: field, forControlEvent: .editingChanged) ?? []
+    }
 
     @Test("validateOnInputChange(isEnabled: true) registers the action and re-validates when it fires")
     func testValidateOnInputChangeEnabled() {
         let field = UITextField()
         field.addRule(EmailRule())
 
-        assert(field.actions(forTarget: field, forControlEvent: .editingChanged) == nil)
+        assert(editingChangedActions(on: field).isEmpty)
 
         field.validateOnInputChange(isEnabled: true)
 
-        assert(field.actions(forTarget: field, forControlEvent: .editingChanged)?.count == 1)
+        let actions = editingChangedActions(on: field)
+        assert(actions.count == 1)
 
         var received: [ValidationError]?
         field.validationHandler = { errors in received = errors }
 
         field.text = "not-an-email"
-        field.perform(Selector(("validatorKit_handleEditingChanged")))
+        field.perform(Selector(actions[0]))
 
         assert(received != nil)
         assert(received?.count == 1)
@@ -84,13 +97,13 @@ struct UITextFieldValidationTests {
         let field = UITextField()
         field.addRule(EmailRule())
         field.validateOnInputChange(isEnabled: true)
-        assert(field.actions(forTarget: field, forControlEvent: .editingChanged)?.count == 1)
+        assert(editingChangedActions(on: field).count == 1)
 
         field.validateOnInputChange(isEnabled: false)
 
         // A real .editingChanged event would now have no target-action pair to
         // dispatch to, so typing would never auto-trigger validation.
-        assert(field.actions(forTarget: field, forControlEvent: .editingChanged) == nil)
+        assert(editingChangedActions(on: field).isEmpty)
     }
 
     @Test("Never enabling validateOnInputChange means no .editingChanged target-action is ever registered")
@@ -98,7 +111,7 @@ struct UITextFieldValidationTests {
         let field = UITextField()
         field.addRule(RequiredRule())
 
-        assert(field.actions(forTarget: field, forControlEvent: .editingChanged) == nil)
+        assert(editingChangedActions(on: field).isEmpty)
     }
 
     @Test("validationHandler receives the result of a direct validate() call")
@@ -128,13 +141,14 @@ struct UITextFieldValidationTests {
 
         // Repeated enable calls must still leave exactly one target-action pair
         // registered, not one per call.
-        assert(field.actions(forTarget: field, forControlEvent: .editingChanged)?.count == 1)
+        let actions = editingChangedActions(on: field)
+        assert(actions.count == 1)
 
         var callCount = 0
         field.validationHandler = { _ in callCount += 1 }
 
         field.text = ""
-        field.perform(Selector(("validatorKit_handleEditingChanged")))
+        field.perform(Selector(actions[0]))
 
         assert(callCount == 1)
     }
