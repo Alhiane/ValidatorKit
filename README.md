@@ -151,6 +151,10 @@ struct SignUpView: View {
 }
 ```
 
+## Examples
+
+See [Examples](Examples) for a runnable command-line sample and reference SwiftUI sign-up form code.
+
 ## Communication
 
 - 🐛 Found a bug? [Open an issue](https://github.com/Alhiane/ValidatorKit/issues/new)

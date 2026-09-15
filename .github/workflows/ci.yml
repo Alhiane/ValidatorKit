@@ -65,15 +65,17 @@ jobs:
       - name: List available simulators
         run: xcrun simctl list devices available
 
-      # `xcodebuild test` currently can't run ValidatorKitUIKitTests to completion:
-      # testValidateOnInputChangeEnabled calls UIControl.sendActions(for:), which
-      # requires a live UIApplication to dispatch target-action pairs. SPM test
-      # bundles have no host app, so the call silently no-ops and the following
-      # assert() crashes the whole xctest process. Tracked in #49. Building for
-      # testing still exercises the real iOS compile path for the test target.
-      - name: Build ValidatorKitUIKitTests for testing
+      # ValidatorKitUIKitTests previously couldn't run to completion under
+      # `xcodebuild test`: testValidateOnInputChangeEnabled called
+      # UIControl.sendActions(for:), which requires a live UIApplication to
+      # dispatch target-action pairs. SPM test bundles have no host app, so the
+      # call silently no-op'd and the following assert() crashed the whole
+      # xctest process. Fixed in #49 by exercising the target-action wiring and
+      # handler directly instead of relying on event dispatch, so the suite now
+      # runs for real here instead of only being built for testing.
+      - name: Run ValidatorKitUIKitTests on iOS Simulator
         run: |
-          xcodebuild build-for-testing \
+          xcodebuild test \
             -scheme ValidatorKit-Package \
             -destination 'platform=iOS Simulator,name=iPhone 16' \
             -only-testing:ValidatorKitUIKitTests

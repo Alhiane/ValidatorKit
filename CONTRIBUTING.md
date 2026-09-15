@@ -2,6 +2,8 @@
 
 Thanks for considering a contribution! A few notes to make the process smooth.
 
+Please note that this project follows a [Code of Conduct](CODE_OF_CONDUCT.md) — by participating, you're expected to uphold it.
+
 ## Development
 
 - `swift build` and `swift test` before opening a PR.
